@@ -1,4 +1,13 @@
-use std::{env, fs};
+use std::{
+    collections::HashMap,
+    env,
+    fs::{self, read_to_string},
+};
+
+struct ChainItem {
+    items: Vec<(String, u32)>,
+    totalcnt: u32,
+}
 
 fn main() {
     let home_dir = env::var("HOME").expect("HOME Environment Variable not found");
@@ -13,8 +22,10 @@ fn main() {
             Ok(f) => f.is_file(),
         });
 
-    for file in files {
-        println!("Name: {}", file.path().display())
+    let strings = files.filter_map(|f| read_to_string(f.path()).ok());
+
+    for s in strings {
+        println!("{}", s);
     }
 
     println!("{}", home_dir);
