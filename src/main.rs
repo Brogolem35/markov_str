@@ -11,10 +11,10 @@ fn main() {
 	let home_dir = env::var("HOME").expect("HOME Environment Variable not found");
 	let training_path = format!("{}/{}/{}", &home_dir, "markov_chain", "training");
 
-	let paths = fs::read_dir(&training_path).expect(&format!("Can't read files from: {}", training_path));
+	let tpaths = fs::read_dir(&training_path).expect(&format!("Can't read files from: {}", training_path));
 
 	// Only the files remain
-	let files = paths
+	let files = tpaths
 		.filter_map(|f| f.ok())
 		.filter(|f| match f.file_type() {
 			Err(_) => false,
