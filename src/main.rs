@@ -1,7 +1,5 @@
 use std::{
-	collections::HashMap,
-	env,
-	fs::{self, read_to_string},
+	collections::HashMap, env, fmt::format, fs::{self, read_to_string}
 };
 
 struct ChainItem {
@@ -11,8 +9,9 @@ struct ChainItem {
 
 fn main() {
 	let home_dir = env::var("HOME").expect("HOME Environment Variable not found");
+	let training_path = format!("{}/{}/{}", &home_dir, "markov_chain", "training");
 
-	let paths = fs::read_dir(&home_dir).expect(&format!("Can't read files from: {}", home_dir));
+	let paths = fs::read_dir(&training_path).expect(&format!("Can't read files from: {}", training_path));
 
 	// Only the files remain
 	let files = paths
