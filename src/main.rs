@@ -26,6 +26,4 @@ fn main() {
 	for s in strings {
 		println!("{}", s);
 	}
-
-	println!("{}", home_dir);
 }
