@@ -21,9 +21,9 @@ fn main() {
 			Ok(f) => f.is_file(),
 		});
 
-	let strings = files.filter_map(|f| read_to_string(f.path()).ok());
+	let contents = files.filter_map(|f| read_to_string(f.path()).ok());
 
-	for s in strings {
+	for s in contents {
 		println!("{}", s);
 	}
 }
