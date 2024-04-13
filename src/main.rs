@@ -57,15 +57,20 @@ fn gen_chain(s: String) -> HashMap<String, ChainItem> {
 
 	let tokens = WORD_REGEX.find_iter(&s);
 
+	// ~~ indicate flag
+	let mut prev = String::from("~~START");
 	for t in tokens {
 		let t = t.as_str().to_string();
-		mc.entry(t.clone())
+
+		mc.entry(prev.clone())
 			.and_modify(|ci| ci.increment(t.clone()))
 			.or_insert(ChainItem::new(t.clone()));
+
+		prev = t.clone();
 	}
 
 	for (k, v) in &mc {
-		println!("{}={}", k, v.totalcnt);
+		println!("{}={}", k, v.items.get("ill").unwrap_or(&0));
 	}
 
 	mc
