@@ -18,7 +18,7 @@ impl ChainItem {
 		ChainItem { items: vec![s] }
 	}
 
-	fn increment(&mut self, s: String) {
+	fn add(&mut self, s: String) {
 		self.items.push(s);
 	}
 }
@@ -55,7 +55,7 @@ fn gen_chain(s: String) -> HashMap<String, ChainItem> {
 		let t = t.as_str().to_string();
 
 		mc.entry(prev.clone())
-			.and_modify(|ci| ci.increment(t.clone()))
+			.and_modify(|ci| ci.add(t.clone()))
 			.or_insert(ChainItem::new(t.clone()));
 
 		prev = t.clone();
