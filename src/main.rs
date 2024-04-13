@@ -1,5 +1,8 @@
 use std::{
-	collections::HashMap, env, fmt::format, fs::{self, read_to_string}
+	collections::HashMap,
+	env,
+	fmt::format,
+	fs::{self, read_to_string},
 };
 
 use regex::Regex;
@@ -10,12 +13,13 @@ struct ChainItem {
 }
 
 fn main() {
-	let word_regex =  Regex::new(r"(\w|'|-)+(\.|!|\?)*").expect("Invalid Regular Expression");
+	let word_regex = Regex::new(r"(\w|'|-)+(\.|!|\?)*").expect("Invalid Regular Expression");
 
 	let home_dir = env::var("HOME").expect("HOME Environment Variable not found");
 	let training_path = format!("{}/{}/{}", &home_dir, "markov_chain", "training");
 
-	let tpaths = fs::read_dir(&training_path).expect(&format!("Can't read files from: {}", training_path));
+	let tpaths = fs::read_dir(&training_path)
+		.expect(&format!("Can't read files from: {}", training_path));
 
 	// Only the files remain
 	let files = tpaths
@@ -26,7 +30,7 @@ fn main() {
 		});
 
 	let contents = files.filter_map(|f| read_to_string(f.path()).ok());
-	
+
 	for s in word_regex.find_iter(&contents.collect::<Vec<String>>()[0]) {
 		println!("{}", s.as_str());
 	}
