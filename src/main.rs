@@ -13,7 +13,7 @@ struct ChainItem {
 }
 
 fn main() {
-	let word_regex = Regex::new(r"(\w|'|-)+(\.|!|\?)*").expect("Invalid Regular Expression");
+	let word_regex = Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").expect("Invalid Regular Expression");
 
 	let home_dir = env::var("HOME").expect("HOME Environment Variable not found");
 	let training_path = format!("{}/{}/{}", &home_dir, "markov_chain", "training");
