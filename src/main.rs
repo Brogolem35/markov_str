@@ -5,6 +5,7 @@ use std::{
 };
 
 use once_cell::sync::Lazy;
+use rand::seq::SliceRandom;
 use regex::Regex;
 
 static WORD_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
@@ -24,6 +25,10 @@ impl ChainItem {
 
 	fn merge(&mut self, other: &mut ChainItem) {
 		self.items.append(&mut other.items)
+	}
+
+	fn get_rand(&self) -> String {
+		self.items.choose(&mut rand::thread_rng()).unwrap().to_string()
 	}
 }
 
