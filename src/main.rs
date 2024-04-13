@@ -1,11 +1,13 @@
 use std::{
 	collections::HashMap,
 	env,
-	fmt::format,
 	fs::{self, read_to_string},
 };
 
+use once_cell::sync::Lazy;
 use regex::Regex;
+
+static WORD_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
 
 struct ChainItem {
 	items: Vec<(String, u32)>,
@@ -13,8 +15,6 @@ struct ChainItem {
 }
 
 fn main() {
-	let word_regex = Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").expect("Invalid Regular Expression");
-
 	let home_dir = env::var("HOME").expect("HOME Environment Variable not found");
 	let training_path = format!("{}/{}/{}", &home_dir, "markov_chain", "training");
 
@@ -29,9 +29,19 @@ fn main() {
 			Ok(f) => f.is_file(),
 		});
 
-	let contents = files.filter_map(|f| read_to_string(f.path()).ok());
+	let contents = files
+		.filter_map(|f| read_to_string(f.path()).ok())
+		.map(|f| chain_gen(f)).collect::<Vec<HashMap<String, ChainItem>>>();
+}
 
-	for s in word_regex.find_iter(&contents.collect::<Vec<String>>()[0]) {
-		println!("{}", s.as_str());
+fn chain_gen(s: String) -> HashMap<String, ChainItem> {
+	let mut mc = HashMap::new();
+
+	let tokens = WORD_REGEX.find_iter(&s);
+
+	for t in tokens {
+		println!("{}", t.as_str())
 	}
+
+	mc
 }
