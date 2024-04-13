@@ -62,7 +62,11 @@ fn gen_chain(s: String) -> HashMap<String, ChainItem> {
 	}
 
 	for (k, v) in &mc {
-		println!("{}={}", k, v.items.iter().filter(|i| i.as_str().eq("the")).count());
+		println!(
+			"{}={}",
+			k,
+			v.items.iter().filter(|i| i.as_str().eq("the")).count()
+		);
 	}
 
 	mc
