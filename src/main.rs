@@ -8,8 +8,6 @@ use once_cell::sync::Lazy;
 use rand::seq::SliceRandom;
 use regex::Regex;
 
-static WORD_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
-
 struct ChainItem {
 	items: Vec<String>,
 }
@@ -28,7 +26,10 @@ impl ChainItem {
 	}
 
 	fn get_rand(&self) -> String {
-		self.items.choose(&mut rand::thread_rng()).unwrap().to_string()
+		self.items
+			.choose(&mut rand::thread_rng())
+			.unwrap()
+			.to_string()
 	}
 }
 
@@ -52,18 +53,22 @@ fn main() {
 	let markov_chain = contents
 		.map(|f| gen_chain(f))
 		.reduce(merge_chain)
-		.expect("None chain to generate");
+		.expect("No chain to generate");
 
-	for (k, v) in &markov_chain {
-		println!(
-			"{}={}",
-			k,
-			v.items.iter().filter(|i| i.as_str().eq("the")).count()
-		);
+	let mut prev = String::from("~~START");
+	for _ in 0..30 {
+		let next = markov_chain[&prev].get_rand();
+		print!("{} ", next);
+		prev = next;
 	}
+
+	println!();
 }
 
 fn gen_chain(s: String) -> HashMap<String, ChainItem> {
+	static WORD_REGEX: Lazy<Regex> =
+		Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
+
 	let mut mc: HashMap<String, ChainItem> = HashMap::new();
 
 	let tokens = WORD_REGEX.find_iter(&s);
