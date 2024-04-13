@@ -10,8 +10,25 @@ use regex::Regex;
 static WORD_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
 
 struct ChainItem {
-	items: Vec<(String, u32)>,
+	items: HashMap<String, u32>,
 	totalcnt: u32,
+}
+
+impl ChainItem {
+	fn new(s: String) -> ChainItem {
+		let mut res = ChainItem {
+			items: HashMap::new(),
+			totalcnt: 1,
+		};
+		res.items.insert(s, 1);
+
+		res
+	}
+
+	fn increment(&mut self, s: String) {
+		self.items.entry(s).and_modify(|e| *e += 1).or_insert(1);
+		self.totalcnt += 1;
+	}
 }
 
 fn main() {
@@ -31,16 +48,24 @@ fn main() {
 
 	let contents = files
 		.filter_map(|f| read_to_string(f.path()).ok())
-		.map(|f| chain_gen(f)).collect::<Vec<HashMap<String, ChainItem>>>();
+		.map(|f| gen_chain(f))
+		.collect::<Vec<HashMap<String, ChainItem>>>();
 }
 
-fn chain_gen(s: String) -> HashMap<String, ChainItem> {
-	let mut mc = HashMap::new();
+fn gen_chain(s: String) -> HashMap<String, ChainItem> {
+	let mut mc: HashMap<String, ChainItem> = HashMap::new();
 
 	let tokens = WORD_REGEX.find_iter(&s);
 
 	for t in tokens {
-		println!("{}", t.as_str())
+		let t = t.as_str().to_string();
+		mc.entry(t.clone())
+			.and_modify(|ci| ci.increment(t.clone()))
+			.or_insert(ChainItem::new(t.clone()));
+	}
+
+	for (k, v) in &mc {
+		println!("{}={}", k, v.totalcnt);
 	}
 
 	mc
