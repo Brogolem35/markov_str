@@ -10,24 +10,16 @@ use regex::Regex;
 static WORD_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
 
 struct ChainItem {
-	items: HashMap<String, u32>,
-	totalcnt: u32,
+	items: Vec<String>,
 }
 
 impl ChainItem {
 	fn new(s: String) -> ChainItem {
-		let mut res = ChainItem {
-			items: HashMap::new(),
-			totalcnt: 1,
-		};
-		res.items.insert(s, 1);
-
-		res
+		ChainItem { items: vec![s] }
 	}
 
 	fn increment(&mut self, s: String) {
-		self.items.entry(s).and_modify(|e| *e += 1).or_insert(1);
-		self.totalcnt += 1;
+		self.items.push(s);
 	}
 }
 
@@ -70,7 +62,7 @@ fn gen_chain(s: String) -> HashMap<String, ChainItem> {
 	}
 
 	for (k, v) in &mc {
-		println!("{}={}", k, v.items.get("ill").unwrap_or(&0));
+		println!("{}={}", k, v.items.iter().filter(|i| i.as_str().eq("the")).count());
 	}
 
 	mc
