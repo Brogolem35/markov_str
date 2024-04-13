@@ -21,6 +21,10 @@ impl ChainItem {
 	fn add(&mut self, s: String) {
 		self.items.push(s);
 	}
+
+	fn merge(&mut self, other: &mut ChainItem) {
+		self.items.append(&mut other.items)
+	}
 }
 
 fn main() {
@@ -38,10 +42,20 @@ fn main() {
 			Ok(f) => f.is_file(),
 		});
 
-	let contents = files
-		.filter_map(|f| read_to_string(f.path()).ok())
+	let contents = files.filter_map(|f| read_to_string(f.path()).ok());
+
+	let markov_chain = contents
 		.map(|f| gen_chain(f))
-		.collect::<Vec<HashMap<String, ChainItem>>>();
+		.reduce(merge_chain)
+		.expect("None chain to generate");
+
+	for (k, v) in &markov_chain {
+		println!(
+			"{}={}",
+			k,
+			v.items.iter().filter(|i| i.as_str().eq("the")).count()
+		);
+	}
 }
 
 fn gen_chain(s: String) -> HashMap<String, ChainItem> {
@@ -61,13 +75,16 @@ fn gen_chain(s: String) -> HashMap<String, ChainItem> {
 		prev = t.clone();
 	}
 
-	for (k, v) in &mc {
-		println!(
-			"{}={}",
-			k,
-			v.items.iter().filter(|i| i.as_str().eq("the")).count()
-		);
+	mc
+}
+
+fn merge_chain(
+	mut a: HashMap<String, ChainItem>,
+	b: HashMap<String, ChainItem>,
+) -> HashMap<String, ChainItem> {
+	for (k, mut v) in b {
+		a.entry(k).and_modify(|i| i.merge(&mut v)).or_insert(v);
 	}
 
-	mc
+	a
 }
