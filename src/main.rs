@@ -35,7 +35,7 @@ impl ChainItem {
 
 fn main() {
 	let home_dir = env::var("HOME").expect("HOME Environment Variable not found");
-	let training_path = format!("{}/{}/{}", &home_dir, "markov_chain", "training");
+	let training_path = home_dir + "/markov_chain" + "/training";
 
 	let tpaths = fs::read_dir(&training_path)
 		.expect(&format!("Can't read files from: {}", training_path));
