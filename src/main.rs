@@ -64,13 +64,16 @@ fn main() {
 	// Generation
 	// ~~ indicate flag
 	let mut prev = String::from("~~START");
-	for _ in 0..30 {
+	let mut res = String::new();
+	for _ in 0..10 {
 		let next = markov_chain[&prev].get_rand();
-		print!("{} ", next);
+		res.push_str(&next);
+		res.push(' ');
 		prev = next;
 	}
+	res.pop();
 
-	println!();
+	println!("{}", res);
 }
 
 /// Generates Markov Chain from given string
