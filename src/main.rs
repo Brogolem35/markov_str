@@ -56,7 +56,7 @@ fn main() {
 
 	let markov_chain = contents
 		// Generates seperate chains for every string
-		.map(|f| gen_chain(f))
+		.map(gen_chain)
 		// Then merges them
 		.reduce(merge_chain)
 		.expect("No chain to generate");
