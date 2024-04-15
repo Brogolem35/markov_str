@@ -7,18 +7,19 @@ use std::{
 use once_cell::sync::Lazy;
 use rand::seq::SliceRandom;
 use regex::Regex;
+use ustr::{ustr, Ustr};
 
-/// Wrapper for Vec<String> to make some operations easier
+/// Wrapper for Vec<Ustr> to make some operations easier
 struct ChainItem {
-	items: Vec<String>,
+	items: Vec<Ustr>,
 }
 
 impl ChainItem {
-	fn new(s: String) -> ChainItem {
+	fn new(s: Ustr) -> ChainItem {
 		ChainItem { items: vec![s] }
 	}
 
-	fn add(&mut self, s: String) {
+	fn add(&mut self, s: Ustr) {
 		self.items.push(s);
 	}
 
@@ -63,13 +64,13 @@ fn main() {
 
 	// Generation
 	// ~~ indicate flag
-	let mut prev = String::from("~~START");
+	let mut prev = ustr("~~START");
 	let mut res = String::new();
 	for _ in 0..10 {
 		let next = markov_chain[&prev].get_rand();
 		res.push_str(&next);
 		res.push(' ');
-		prev = next;
+		prev = next.into();
 	}
 	res.pop();
 
@@ -77,27 +78,27 @@ fn main() {
 }
 
 /// Generates Markov Chain from given string
-fn gen_chain(s: String) -> HashMap<String, ChainItem> {
+fn gen_chain(s: String) -> HashMap<Ustr, ChainItem> {
 	// Regex for kind of tokens we want to match.
 	// Matched tokens may include letters, digits, (') and (-) symbols, and can end with (.), (!), and (?) symbols.
 	static WORD_REGEX: Lazy<Regex> =
 		Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
 
-	let mut mc: HashMap<String, ChainItem> = HashMap::new();
+	let mut mc: HashMap<Ustr, ChainItem> = HashMap::new();
 
 	let tokens = WORD_REGEX.find_iter(&s);
 
 	// ~~ indicate flag
-	let mut prev = String::from("~~START");
+	let mut prev = ustr("~~START");
 	for t in tokens {
 		// find_iter() doesn't return an iterator of "String"s but "Match"es. Must be converted manually.
-		let t = t.as_str().to_string();
+		let t = ustr(t.as_str());
 
-		mc.entry(prev.clone())
-			.and_modify(|ci| ci.add(t.clone()))
+		mc.entry(prev)
+			.and_modify(|ci| ci.add(t))
 			.or_insert(ChainItem::new(t.clone()));
 
-		prev = t.clone();
+		prev = t;
 	}
 
 	mc
@@ -105,9 +106,9 @@ fn gen_chain(s: String) -> HashMap<String, ChainItem> {
 
 /// Merges given Markov Chains
 fn merge_chain(
-	mut a: HashMap<String, ChainItem>,
-	b: HashMap<String, ChainItem>,
-) -> HashMap<String, ChainItem> {
+	mut a: HashMap<Ustr, ChainItem>,
+	b: HashMap<Ustr, ChainItem>,
+) -> HashMap<Ustr, ChainItem> {
 	for (k, mut v) in b {
 		a.entry(k).and_modify(|i| i.merge(&mut v)).or_insert(v);
 	}
