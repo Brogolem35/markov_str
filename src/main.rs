@@ -11,14 +11,14 @@ use ustr::{ustr, Ustr};
 
 struct MarkovChain {
 	items: HashMap<Vec<Ustr>, ChainItem>,
-	sample_rate: usize,
+	state_size: usize,
 }
 
 impl MarkovChain {
-	fn new(sample_rate: usize) -> MarkovChain {
+	fn new(state_size: usize) -> MarkovChain {
 		MarkovChain {
 			items: HashMap::new(),
-			sample_rate: sample_rate,
+			state_size,
 		}
 	}
 
@@ -32,20 +32,20 @@ impl MarkovChain {
 		let tokens = WORD_REGEX.find_iter(text);
 
 		// ~~ indicate flag
-		let mut prev = Vec::with_capacity(self.sample_rate);
+		let mut prev = Vec::with_capacity(self.state_size);
 		prev.push(ustr("~~START"));
 		for t in tokens {
 			// find_iter() doesn't return an iterator of "String"s but "Match"es. Must be converted manually.
 			let t = ustr(t.as_str());
 			
-			// TODO: Optimize
-			self.items
-				.entry(prev.clone())
-				.and_modify(|ci| ci.add(t))
-				.or_insert(ChainItem::new(t.clone()));
+			if let Some(ci) = self.items.get_mut(&prev) {
+				ci.add(t);
+			}else {
+				self.items.insert(prev.clone(), ChainItem::new(t.clone()));
+			}
 
 			prev.push(t);
-			if prev.len() > self.sample_rate {
+			if prev.len() > self.state_size {
 				prev.remove(0);
 			}
 		}
@@ -55,7 +55,7 @@ impl MarkovChain {
 		let mut res = String::new();
 
 		// ~~ indicate flag
-		let mut prev = Vec::with_capacity(self.sample_rate);
+		let mut prev = Vec::with_capacity(self.state_size);
 		prev.push(ustr("~~START"));
 		for _ in 0..n {
 			let next = self.items[&prev].get_rand();
@@ -63,7 +63,7 @@ impl MarkovChain {
 			res.push(' ');
 
 			prev.push(next);
-			if prev.len() > self.sample_rate {
+			if prev.len() > self.state_size {
 				prev.remove(0);
 			}
 		}
