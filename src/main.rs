@@ -10,7 +10,7 @@ use regex::Regex;
 use ustr::{ustr, Ustr};
 
 struct MarkovChain {
-	items: HashMap<Ustr, ChainItem>,
+	items: HashMap<Vec<Ustr>, ChainItem>,
 	sample_rate: usize,
 }
 
@@ -32,29 +32,40 @@ impl MarkovChain {
 		let tokens = WORD_REGEX.find_iter(text);
 
 		// ~~ indicate flag
-		let mut prev = ustr("~~START");
+		let mut prev = Vec::with_capacity(self.sample_rate);
+		prev.push(ustr("~~START"));
 		for t in tokens {
 			// find_iter() doesn't return an iterator of "String"s but "Match"es. Must be converted manually.
 			let t = ustr(t.as_str());
-
+			
+			// TODO: Optimize
 			self.items
-				.entry(prev)
+				.entry(prev.clone())
 				.and_modify(|ci| ci.add(t))
 				.or_insert(ChainItem::new(t.clone()));
 
-			prev = t;
+			prev.push(t);
+			if prev.len() > self.sample_rate {
+				prev.remove(0);
+			}
 		}
 	}
 
 	fn generate_text(&self, n: usize) -> String {
-		// ~~ indicate flag
-		let mut prev = ustr("~~START");
 		let mut res = String::new();
-		for _ in 0..10 {
+
+		// ~~ indicate flag
+		let mut prev = Vec::with_capacity(self.sample_rate);
+		prev.push(ustr("~~START"));
+		for _ in 0..n {
 			let next = self.items[&prev].get_rand();
 			res.push_str(&next);
 			res.push(' ');
-			prev = next.into();
+
+			prev.push(next);
+			if prev.len() > self.sample_rate {
+				prev.remove(0);
+			}
 		}
 		res.pop();
 
@@ -76,12 +87,12 @@ impl ChainItem {
 		self.items.push(s);
 	}
 
-	fn get_rand(&self) -> String {
+	fn get_rand(&self) -> Ustr {
 		self.items
 			// get a random item from the Vec
 			.choose(&mut rand::thread_rng())
 			.unwrap()
-			.to_string()
+			.clone()
 	}
 }
 
@@ -112,5 +123,5 @@ fn main() {
 		});
 
 	// Generation
-	println!("{}", markov_chain.generate_text(10));
+	println!("{}", markov_chain.generate_text(25));
 }
