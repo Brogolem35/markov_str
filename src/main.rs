@@ -9,6 +9,59 @@ use rand::seq::SliceRandom;
 use regex::Regex;
 use ustr::{ustr, Ustr};
 
+struct MarkovChain {
+	items: HashMap<Ustr, ChainItem>,
+	sample_rate: usize,
+}
+
+impl MarkovChain {
+	fn new(sample_rate: usize) -> MarkovChain {
+		MarkovChain {
+			items: HashMap::new(),
+			sample_rate: sample_rate,
+		}
+	}
+
+	/// Generates Markov Chain from given string
+	fn add_text(&mut self, text: &str) {
+		// Regex for kind of tokens we want to match.
+		// Matched tokens may include letters, digits, (') and (-) symbols, and can end with (.), (!), and (?) symbols.
+		static WORD_REGEX: Lazy<Regex> =
+			Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
+
+		let tokens = WORD_REGEX.find_iter(text);
+
+		// ~~ indicate flag
+		let mut prev = ustr("~~START");
+		for t in tokens {
+			// find_iter() doesn't return an iterator of "String"s but "Match"es. Must be converted manually.
+			let t = ustr(t.as_str());
+
+			self.items
+				.entry(prev)
+				.and_modify(|ci| ci.add(t))
+				.or_insert(ChainItem::new(t.clone()));
+
+			prev = t;
+		}
+	}
+
+	fn generate_text(&self, n: usize) -> String {
+		// ~~ indicate flag
+		let mut prev = ustr("~~START");
+		let mut res = String::new();
+		for _ in 0..10 {
+			let next = self.items[&prev].get_rand();
+			res.push_str(&next);
+			res.push(' ');
+			prev = next.into();
+		}
+		res.pop();
+
+		res
+	}
+}
+
 /// Wrapper for Vec<Ustr> to make some operations easier
 struct ChainItem {
 	items: Vec<Ustr>,
@@ -53,44 +106,11 @@ fn main() {
 
 	let markov_chain = contents
 		// Then merges them
-		.fold(HashMap::new(), |a, s| gen_chain(a, s));
+		.fold(MarkovChain::new(2), |mut a, s| {
+			a.add_text(&s);
+			a
+		});
 
 	// Generation
-	// ~~ indicate flag
-	let mut prev = ustr("~~START");
-	let mut res = String::new();
-	for _ in 0..10 {
-		let next = markov_chain[&prev].get_rand();
-		res.push_str(&next);
-		res.push(' ');
-		prev = next.into();
-	}
-	res.pop();
-
-	println!("{}", res);
-}
-
-/// Generates Markov Chain from given string
-fn gen_chain(mut mc: HashMap<Ustr, ChainItem>, s: String) -> HashMap<Ustr, ChainItem> {
-	// Regex for kind of tokens we want to match.
-	// Matched tokens may include letters, digits, (') and (-) symbols, and can end with (.), (!), and (?) symbols.
-	static WORD_REGEX: Lazy<Regex> =
-		Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
-
-	let tokens = WORD_REGEX.find_iter(&s);
-
-	// ~~ indicate flag
-	let mut prev = ustr("~~START");
-	for t in tokens {
-		// find_iter() doesn't return an iterator of "String"s but "Match"es. Must be converted manually.
-		let t = ustr(t.as_str());
-
-		mc.entry(prev)
-			.and_modify(|ci| ci.add(t))
-			.or_insert(ChainItem::new(t.clone()));
-
-		prev = t;
-	}
-
-	mc
+	println!("{}", markov_chain.generate_text(10));
 }
