@@ -23,10 +23,6 @@ impl ChainItem {
 		self.items.push(s);
 	}
 
-	fn merge(&mut self, other: &mut ChainItem) {
-		self.items.append(&mut other.items)
-	}
-
 	fn get_rand(&self) -> String {
 		self.items
 			// get a random item from the Vec
@@ -56,11 +52,8 @@ fn main() {
 	let contents = files.filter_map(|f| read_to_string(f.path()).ok());
 
 	let markov_chain = contents
-		// Generates seperate chains for every string
-		.map(gen_chain)
 		// Then merges them
-		.reduce(merge_chain)
-		.expect("No chain to generate");
+		.fold(HashMap::new(), |a, s| gen_chain(a, s));
 
 	// Generation
 	// ~~ indicate flag
@@ -78,13 +71,11 @@ fn main() {
 }
 
 /// Generates Markov Chain from given string
-fn gen_chain(s: String) -> HashMap<Ustr, ChainItem> {
+fn gen_chain(mut mc: HashMap<Ustr, ChainItem>, s: String) -> HashMap<Ustr, ChainItem> {
 	// Regex for kind of tokens we want to match.
 	// Matched tokens may include letters, digits, (') and (-) symbols, and can end with (.), (!), and (?) symbols.
 	static WORD_REGEX: Lazy<Regex> =
 		Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
-
-	let mut mc: HashMap<Ustr, ChainItem> = HashMap::new();
 
 	let tokens = WORD_REGEX.find_iter(&s);
 
@@ -102,16 +93,4 @@ fn gen_chain(s: String) -> HashMap<Ustr, ChainItem> {
 	}
 
 	mc
-}
-
-/// Merges given Markov Chains
-fn merge_chain(
-	mut a: HashMap<Ustr, ChainItem>,
-	b: HashMap<Ustr, ChainItem>,
-) -> HashMap<Ustr, ChainItem> {
-	for (k, mut v) in b {
-		a.entry(k).and_modify(|i| i.merge(&mut v)).or_insert(v);
-	}
-
-	a
 }
