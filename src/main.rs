@@ -50,7 +50,7 @@ fn main() {
 
 	// Gets the paths of evey file and directory in the training_path.
 	let tpaths = fs::read_dir(&args.training_path)
-		.expect(&format!("Can't read files from: {:?}", args.training_path));
+		.unwrap_or_else(|_| panic!("Can't read files from: {:?}", args.training_path));
 
 	// Only the files remain
 	let files = tpaths
@@ -104,7 +104,7 @@ fn gen_chain(s: String) -> HashMap<Ustr, ChainItem> {
 
 		mc.entry(prev)
 			.and_modify(|ci| ci.add(t))
-			.or_insert(ChainItem::new(t.clone()));
+			.or_insert(ChainItem::new(t));
 
 		prev = t;
 	}
