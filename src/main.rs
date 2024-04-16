@@ -8,7 +8,8 @@ use clap::Parser;
 use once_cell::sync::Lazy;
 use rand::seq::SliceRandom;
 use regex::Regex;
-use ustr::{ustr, Ustr};
+
+type Chain<'a> = HashMap<&'a str, ChainItem<'a>>;
 
 /// Markov Chain generator written in Rust.
 #[derive(Parser)]
@@ -19,29 +20,28 @@ struct Args {
 }
 
 /// Wrapper for Vec<Ustr> to make some operations easier
-struct ChainItem {
-	items: Vec<Ustr>,
+struct ChainItem<'a> {
+	items: Vec<&'a str>,
 }
 
-impl ChainItem {
-	fn new(s: Ustr) -> ChainItem {
-		ChainItem { items: vec![s] }
+impl<'a> ChainItem<'a> {
+	fn new(item: &'a str) -> ChainItem<'a> {
+		ChainItem { items: vec![item] }
 	}
 
-	fn add(&mut self, s: Ustr) {
-		self.items.push(s);
+	fn add(&mut self, item: &'a str) {
+		self.items.push(item);
 	}
 
-	fn merge(&mut self, other: &mut ChainItem) {
+	fn merge(&mut self, other: &mut ChainItem<'a>) {
 		self.items.append(&mut other.items)
 	}
 
-	fn get_rand(&self) -> String {
+	fn get_rand(&self) -> &str {
 		self.items
 			// get a random item from the Vec
 			.choose(&mut rand::thread_rng())
 			.unwrap()
-			.to_string()
 	}
 }
 
@@ -61,7 +61,7 @@ fn main() {
 		});
 
 	// Reads every file into a string
-	let contents = files.filter_map(|f| read_to_string(f.path()).ok());
+	let contents = files.filter_map(|f| read_to_string(f.path()).ok()).map(|s| &*s.leak());
 
 	let markov_chain = contents
 		// Generates seperate chains for every string
@@ -72,13 +72,13 @@ fn main() {
 
 	// Generation
 	// ~~ indicate flag
-	let mut prev = ustr("~~START");
+	let mut prev = "~~START";
 	let mut res = String::new();
 	for _ in 0..10 {
 		let next = markov_chain[&prev].get_rand();
 		res.push_str(&next);
 		res.push(' ');
-		prev = next.into();
+		prev = next;
 	}
 	res.pop();
 
@@ -86,37 +86,34 @@ fn main() {
 }
 
 /// Generates Markov Chain from given string
-fn gen_chain(s: String) -> HashMap<Ustr, ChainItem> {
+fn gen_chain<'a>(string: &'a str) -> Chain<'a> {
 	// Regex for kind of tokens we want to match.
 	// Matched tokens may include letters, digits, (') and (-) symbols, and can end with (.), (!), and (?) symbols.
 	static WORD_REGEX: Lazy<Regex> =
 		Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
 
-	let mut mc: HashMap<Ustr, ChainItem> = HashMap::new();
+	let mut chain: Chain<'a> = Default::default();
 
-	let tokens = WORD_REGEX.find_iter(&s);
+	let tokens = WORD_REGEX.find_iter(string);
 
 	// ~~ indicate flag
-	let mut prev = ustr("~~START");
+	let mut prev = "~~START";
 	for t in tokens {
 		// find_iter() doesn't return an iterator of "String"s but "Match"es. Must be converted manually.
-		let t = ustr(t.as_str());
+		let t = t.as_str();
 
-		mc.entry(prev)
+		chain.entry(prev)
 			.and_modify(|ci| ci.add(t))
 			.or_insert(ChainItem::new(t));
 
 		prev = t;
 	}
 
-	mc
+	chain
 }
 
 /// Merges given Markov Chains
-fn merge_chain(
-	mut a: HashMap<Ustr, ChainItem>,
-	b: HashMap<Ustr, ChainItem>,
-) -> HashMap<Ustr, ChainItem> {
+fn merge_chain<'a>(mut a: Chain<'a>, b: Chain<'a>) -> Chain<'a> {
 	for (k, mut v) in b {
 		a.entry(k).and_modify(|i| i.merge(&mut v)).or_insert(v);
 	}
