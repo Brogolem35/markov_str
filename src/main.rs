@@ -22,6 +22,13 @@ impl MarkovChain {
 		}
 	}
 
+	fn with_capacity(state_size: usize, capacity: usize) -> MarkovChain {
+		MarkovChain {
+			items: HashMap::with_capacity(capacity),
+			state_size,
+		}
+	}
+
 	/// Generates Markov Chain from given string
 	fn add_text(&mut self, text: &str) {
 		// Regex for kind of tokens we want to match.
@@ -120,7 +127,7 @@ fn main() {
 
 	let markov_chain = contents
 		// Then merges them
-		.fold(MarkovChain::new(2), |mut a, s| {
+		.fold(MarkovChain::with_capacity(2, 8_000_000), |mut a, s| {
 			a.add_text(&s);
 			a
 		});
