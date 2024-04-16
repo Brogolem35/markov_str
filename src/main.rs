@@ -14,7 +14,7 @@ use ustr::{ustr, Ustr};
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Args {
-	/// Name of the person to greet
+	/// The directory that contains the program inputs
 	training_path: PathBuf,
 }
 
