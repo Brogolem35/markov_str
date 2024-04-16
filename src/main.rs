@@ -1,13 +1,22 @@
 use std::{
 	collections::HashMap,
-	env,
 	fs::{self, read_to_string},
+	path::PathBuf,
 };
 
+use clap::Parser;
 use once_cell::sync::Lazy;
 use rand::seq::SliceRandom;
 use regex::Regex;
 use ustr::{ustr, Ustr};
+
+/// Markov Chain generator written in Rust.
+#[derive(Parser)]
+#[command(version, about, long_about = None)]
+struct Args {
+	/// Name of the person to greet
+	training_path: PathBuf,
+}
 
 /// Wrapper for Vec<Ustr> to make some operations easier
 struct ChainItem {
@@ -37,12 +46,11 @@ impl ChainItem {
 }
 
 fn main() {
-	let home_dir = env::var("HOME").expect("HOME Environment Variable not found");
-	let training_path = home_dir + "/markov_chain" + "/training";
+	let args = Args::parse();
 
 	// Gets the paths of evey file and directory in the training_path.
-	let tpaths = fs::read_dir(&training_path)
-		.expect(&format!("Can't read files from: {}", training_path));
+	let tpaths = fs::read_dir(&args.training_path)
+		.expect(&format!("Can't read files from: {:?}", args.training_path));
 
 	// Only the files remain
 	let files = tpaths
