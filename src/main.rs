@@ -10,7 +10,7 @@ use regex::Regex;
 use ustr::{ustr, Ustr};
 
 struct MarkovChain {
-	items: HashMap<Vec<Ustr>, ChainItem>,
+	items: HashMap<String, ChainItem>,
 	state_size: usize,
 }
 
@@ -33,18 +33,19 @@ impl MarkovChain {
 
 		// ~~ indicate flag
 		let mut prev = Vec::with_capacity(self.state_size);
-		prev.push(ustr("~~START"));
+		prev.push("~~START");
 		for t in tokens {
+			let pstr = prev.join(" ");
 			// find_iter() doesn't return an iterator of "String"s but "Match"es. Must be converted manually.
 			let t = ustr(t.as_str());
-			
-			if let Some(ci) = self.items.get_mut(&prev) {
+
+			if let Some(ci) = self.items.get_mut(&pstr) {
 				ci.add(t);
-			}else {
-				self.items.insert(prev.clone(), ChainItem::new(t.clone()));
+			} else {
+				self.items.insert(pstr, ChainItem::new(t.clone()));
 			}
 
-			prev.push(t);
+			prev.push(t.as_str());
 			if prev.len() > self.state_size {
 				prev.remove(0);
 			}
@@ -56,13 +57,15 @@ impl MarkovChain {
 
 		// ~~ indicate flag
 		let mut prev = Vec::with_capacity(self.state_size);
-		prev.push(ustr("~~START"));
+		prev.push("~~START");
 		for _ in 0..n {
-			let next = self.items[&prev].get_rand();
+			let pstr = prev.join(" ");
+
+			let next = self.items[&pstr].get_rand();
 			res.push_str(&next);
 			res.push(' ');
 
-			prev.push(next);
+			prev.push(next.as_str());
 			if prev.len() > self.state_size {
 				prev.remove(0);
 			}
@@ -123,5 +126,9 @@ fn main() {
 		});
 
 	// Generation
+	println!("{}", markov_chain.generate_text(25));
+	println!("{}", markov_chain.generate_text(25));
+	println!("{}", markov_chain.generate_text(25));
+	println!("{}", markov_chain.generate_text(25));
 	println!("{}", markov_chain.generate_text(25));
 }
