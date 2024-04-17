@@ -1,30 +1,31 @@
 use std::{
-	collections::HashMap,
 	env,
 	fs::{self, read_to_string},
+	hash::BuildHasherDefault,
 };
 
 use once_cell::sync::Lazy;
 use rand::seq::SliceRandom;
 use regex::Regex;
+use rustc_hash::{FxHashMap, FxHasher};
 use ustr::{ustr, Ustr};
 
 struct MarkovChain {
-	items: HashMap<String, ChainItem>,
+	items: FxHashMap<String, ChainItem>,
 	state_size: usize,
 }
 
 impl MarkovChain {
 	fn new(state_size: usize) -> MarkovChain {
 		MarkovChain {
-			items: HashMap::new(),
+			items: FxHashMap::<String, ChainItem>::default(),
 			state_size,
 		}
 	}
 
 	fn with_capacity(state_size: usize, capacity: usize) -> MarkovChain {
 		MarkovChain {
-			items: HashMap::with_capacity(capacity),
+			items: FxHashMap::with_capacity_and_hasher(capacity, BuildHasherDefault::<FxHasher>::default()),
 			state_size,
 		}
 	}
@@ -39,7 +40,7 @@ impl MarkovChain {
 		let tokens = WORD_REGEX.find_iter(text);
 
 		// ~~ indicate flag
-		let mut prev = Vec::with_capacity(self.state_size);
+		let mut prev = Vec::with_capacity(self.state_size + 1);
 		prev.push("~~START");
 		for t in tokens {
 			let pstr = prev.join(" ");
@@ -133,6 +134,8 @@ fn main() {
 		});
 
 	// Generation
+	println!("{}", markov_chain.items.len());
+	println!("{}", markov_chain.items.capacity());
 	println!("{}", markov_chain.generate_text(25));
 	println!("{}", markov_chain.generate_text(25));
 	println!("{}", markov_chain.generate_text(25));
