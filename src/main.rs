@@ -47,7 +47,7 @@ impl MarkovChain {
 		prev.push("~~START");
 		for t in tokens {
 			for i in 1..=self.state_size.min(prev.len()) {
-				let pslice = &prev[(prev.len()-i)..];
+				let pslice = &prev[(prev.len() - i)..];
 
 				let pstr = pslice.join(" ");
 				if let "~~START P" = &*pstr {
@@ -70,12 +70,37 @@ impl MarkovChain {
 		}
 	}
 
-	fn generate_text(&self, n: usize) -> String {
+	fn generate(&self, n: usize) -> String {
 		let mut res = String::new();
 
 		// ~~ indicate flag
 		let mut prev = Vec::with_capacity(self.state_size);
 		prev.push("~~START");
+		for _ in 0..n {
+			let pstr = prev.join(" ");
+
+			let next = self.items[&pstr].get_rand();
+			res.push_str(&next);
+			res.push(' ');
+
+			prev.push(next.as_str());
+			if prev.len() > self.state_size {
+				prev.remove(0);
+			}
+		}
+		res.pop();
+
+		res
+	}
+
+	fn generate_start(&self, start: &str, n: usize) -> String {
+		let mut res = String::new();
+		res.push_str(start);
+		res.push(' ');
+
+		// ~~ indicate flag
+		let mut prev = Vec::with_capacity(self.state_size);
+		prev.push(start);
 		for _ in 0..n {
 			let pstr = prev.join(" ");
 
@@ -146,9 +171,7 @@ fn main() {
 	// Generation
 	println!("{}", markov_chain.items.len());
 	println!("{}", markov_chain.items.capacity());
-	println!("{}", markov_chain.generate_text(25));
-	println!("{}", markov_chain.generate_text(25));
-	println!("{}", markov_chain.generate_text(25));
-	println!("{}", markov_chain.generate_text(25));
-	println!("{}", markov_chain.generate_text(25));
+	println!("{}", markov_chain.generate_start("among", 25));
+	println!("{}", markov_chain.generate_start("among", 25));
+	println!("{}", markov_chain.generate_start("among", 25));
 }
