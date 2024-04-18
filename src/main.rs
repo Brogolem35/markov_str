@@ -74,7 +74,7 @@ impl MarkovChain {
 		let mut res = String::new();
 
 		// ~~ indicate flag
-		let mut prev = Vec::with_capacity(self.state_size);
+		let mut prev = Vec::with_capacity(self.state_size + 1);
 		prev.push("~~START");
 		for _ in 0..n {
 			let pstr = prev.join(" ");
@@ -99,7 +99,7 @@ impl MarkovChain {
 		res.push(' ');
 
 		// ~~ indicate flag
-		let mut prev = Vec::with_capacity(self.state_size);
+		let mut prev = Vec::with_capacity(self.state_size + 1);
 		prev.push(start);
 		for _ in 0..n {
 			let pstr = prev.join(" ");
