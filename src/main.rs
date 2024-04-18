@@ -25,7 +25,10 @@ impl MarkovChain {
 
 	fn with_capacity(state_size: usize, capacity: usize) -> MarkovChain {
 		MarkovChain {
-			items: FxHashMap::with_capacity_and_hasher(capacity, BuildHasherDefault::<FxHasher>::default()),
+			items: FxHashMap::with_capacity_and_hasher(
+				capacity,
+				BuildHasherDefault::<FxHasher>::default(),
+			),
 			state_size,
 		}
 	}
@@ -43,14 +46,21 @@ impl MarkovChain {
 		let mut prev = Vec::with_capacity(self.state_size + 1);
 		prev.push("~~START");
 		for t in tokens {
-			let pstr = prev.join(" ");
-			// find_iter() doesn't return an iterator of "String"s but "Match"es. Must be converted manually.
-			let t = ustr(t.as_str());
+			for i in 1..=self.state_size.min(prev.len()) {
+				let pslice = &prev[(prev.len()-i)..];
 
-			if let Some(ci) = self.items.get_mut(&pstr) {
-				ci.add(t);
-			} else {
-				self.items.insert(pstr, ChainItem::new(t.clone()));
+				let pstr = pslice.join(" ");
+				if let "~~START P" = &*pstr {
+					dbg!(&pslice);
+				}
+				// find_iter() doesn't return an iterator of "String"s but "Match"es. Must be converted manually.
+				let t = ustr(t.as_str());
+
+				if let Some(ci) = self.items.get_mut(&pstr) {
+					ci.add(t);
+				} else {
+					self.items.insert(pstr, ChainItem::new(t.clone()));
+				}
 			}
 
 			prev.push(t.as_str());
