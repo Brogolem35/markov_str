@@ -45,7 +45,7 @@ impl MarkovChain {
 				let pslice = &prev[(prev.len() - i)..];
 
 				let pstr = pslice.join(" ");
-                                
+
 				// find_iter() doesn't return an iterator of "String"s but "Match"es. Must be converted manually.
 				let t = ustr(t.as_str());
 
@@ -63,6 +63,27 @@ impl MarkovChain {
 		}
 	}
 
+	pub fn next_step(&self, prev: &Vec<&str>) -> Ustr {
+		for i in 0..prev.len() {
+			let pslice = &prev[i..];
+
+			let pstr = pslice.join(" ");
+
+			if let Some(res) = self.items.get(&pstr) {
+				return res.get_rand();
+			} else {
+				continue;
+			}
+		}
+
+		self.items
+			.values()
+			.collect::<Vec<&ChainItem>>()
+			.choose(&mut rand::thread_rng())
+			.unwrap()
+			.get_rand()
+	}
+
 	pub fn generate(&self, n: usize) -> String {
 		let mut res = String::new();
 
@@ -70,9 +91,8 @@ impl MarkovChain {
 		let mut prev = Vec::with_capacity(self.state_size + 1);
 		prev.push("~~START");
 		for _ in 0..n {
-			let pstr = prev.join(" ");
+			let next = self.next_step(&prev);
 
-			let next = self.items[&pstr].get_rand();
 			res.push_str(&next);
 			res.push(' ');
 
@@ -81,6 +101,7 @@ impl MarkovChain {
 				prev.remove(0);
 			}
 		}
+
 		res.pop();
 
 		res
