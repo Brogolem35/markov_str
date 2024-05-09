@@ -45,9 +45,7 @@ impl MarkovChain {
 				let pslice = &prev[(prev.len() - i)..];
 
 				let pstr = pslice.join(" ");
-				if let "~~START P" = &*pstr {
-					dbg!(&pslice);
-				}
+                                
 				// find_iter() doesn't return an iterator of "String"s but "Match"es. Must be converted manually.
 				let t = ustr(t.as_str());
 
