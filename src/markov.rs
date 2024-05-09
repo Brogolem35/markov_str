@@ -41,7 +41,7 @@ impl MarkovChain {
 		let mut prev = Vec::with_capacity(self.state_size + 1);
 		prev.push("~~START");
 		for t in tokens {
-			for i in 1..=self.state_size.min(prev.len()) {
+			for i in 1..=prev.len() {
 				let pslice = &prev[(prev.len() - i)..];
 
 				let pstr = pslice.join(" ");
