@@ -115,9 +115,7 @@ impl MarkovChain {
 		let mut prev = Vec::with_capacity(self.state_size + 1);
 		prev.push(start);
 		for _ in 0..n {
-			let pstr = prev.join(" ");
-
-			let next = self.items[&pstr].get_rand();
+			let next = self.next_step(&prev);
 			res.push_str(&next);
 			res.push(' ');
 
