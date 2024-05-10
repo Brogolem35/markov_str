@@ -89,7 +89,6 @@ impl MarkovChain {
 
 		// ~~ indicate flag
 		let mut prev = Vec::with_capacity(self.state_size + 1);
-		prev.push("~~START");
 		for _ in 0..n {
 			let next = self.next_step(&prev);
 
