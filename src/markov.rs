@@ -107,13 +107,21 @@ impl MarkovChain {
 	}
 
 	pub fn generate_start(&self, start: &str, n: usize) -> String {
-		let mut res = String::new();
-		res.push_str(start);
-		res.push(' ');
+		static WORD_REGEX: Lazy<Regex> =
+			Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
 
-		// ~~ indicate flag
-		let mut prev = Vec::with_capacity(self.state_size + 1);
-		prev.push(start);
+		let mut res = String::new();
+
+		let mut prev: Vec<&str> = WORD_REGEX
+			.find_iter(start)
+			.map(|m| m.as_str())
+			.collect::<Vec<&str>>()
+			.into_iter()
+			.rev()
+			.take(2)
+			.rev()
+			.collect();
+
 		for _ in 0..n {
 			let next = self.next_step(&prev);
 			res.push_str(&next);
