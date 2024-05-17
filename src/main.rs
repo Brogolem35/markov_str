@@ -25,8 +25,8 @@ fn main() {
 	// Reads every file into a string
 	let contents = files.filter_map(|f| read_to_string(f.path()).ok());
 
+	// Creating the Markov Chain
 	let markov_chain = contents
-		// Then merges them
 		.fold(MarkovChain::with_capacity(2, 8_000_000), |mut a, s| {
 			a.add_text(&s);
 			a
@@ -38,3 +38,5 @@ fn main() {
 	println!("{}", markov_chain.generate_start("among", 25));
 	println!("{}", markov_chain.generate_start("among", 25));
 }
+
+
