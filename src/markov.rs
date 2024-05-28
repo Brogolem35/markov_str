@@ -1,29 +1,26 @@
+use hashbrown::HashMap;
 use once_cell::sync::Lazy;
 use rand::seq::SliceRandom;
 use regex::Regex;
-use rustc_hash::{FxHashMap, FxHasher};
-use std::hash::BuildHasherDefault;
 use ustr::{ustr, Ustr};
 
 pub struct MarkovChain {
-	pub items: FxHashMap<String, ChainItem>,
+	pub items: HashMap<String, ChainItem>,
 	pub state_size: usize,
 }
 
 impl MarkovChain {
+	#[allow(dead_code)]
 	pub fn new(state_size: usize) -> MarkovChain {
 		MarkovChain {
-			items: FxHashMap::<String, ChainItem>::default(),
+			items: HashMap::<String, ChainItem>::new(),
 			state_size,
 		}
 	}
 
 	pub fn with_capacity(state_size: usize, capacity: usize) -> MarkovChain {
 		MarkovChain {
-			items: FxHashMap::with_capacity_and_hasher(
-				capacity,
-				BuildHasherDefault::<FxHasher>::default(),
-			),
+			items: HashMap::with_capacity(capacity),
 			state_size,
 		}
 	}
