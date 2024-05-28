@@ -52,7 +52,7 @@ impl MarkovChain {
 				if let Some(ci) = self.items.get_mut(&pstr) {
 					ci.add(t);
 				} else {
-					self.items.insert(pstr, ChainItem::new(t.clone()));
+					self.items.insert(pstr, ChainItem::new(t));
 				}
 			}
 
@@ -63,7 +63,7 @@ impl MarkovChain {
 		}
 	}
 
-	pub fn next_step(&self, prev: &Vec<&str>) -> Ustr {
+	pub fn next_step(&self, prev: &[&str]) -> Ustr {
 		for i in 0..prev.len() {
 			let pslice = &prev[i..];
 
@@ -84,6 +84,7 @@ impl MarkovChain {
 			.get_rand()
 	}
 
+	#[allow(dead_code)]
 	pub fn generate(&self, n: usize) -> String {
 		let mut res = String::new();
 
@@ -153,10 +154,9 @@ impl ChainItem {
 	}
 
 	pub fn get_rand(&self) -> Ustr {
-		self.items
+		*self.items
 			// get a random item from the Vec
 			.choose(&mut rand::thread_rng())
 			.unwrap()
-			.clone()
 	}
 }
