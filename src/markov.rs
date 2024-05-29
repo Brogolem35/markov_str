@@ -27,11 +27,6 @@ impl MarkovChain {
 
 	/// Generates Markov Chain from given string
 	pub fn add_text(&mut self, text: &str) {
-		// Regex for kind of tokens we want to match.
-		// Matched tokens may include letters, digits, (') and (-) symbols, and can end with (.), (!), and (?) symbols.
-		static WORD_REGEX: Lazy<Regex> =
-			Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
-
 		let tokens = find_words(text);
 
 		// ~~ indicate flag
