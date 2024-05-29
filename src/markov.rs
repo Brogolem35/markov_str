@@ -160,8 +160,8 @@ impl ChainItem {
 
 // (\w|\d|'|-)+(\.|!|\?)*
 fn find_words<'a>(text: &'a str) -> Vec<String> {
-	let mut buf: Vec<char> = Vec::new();
-	let mut res: Vec<String> = Vec::new();
+	let mut buf: Vec<char> = Vec::with_capacity(255);
+	let mut res: Vec<String> = Vec::with_capacity(255);
 	let mut in_word = false;
 	let mut post_word = false;
 
