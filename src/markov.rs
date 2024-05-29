@@ -32,12 +32,12 @@ impl MarkovChain {
 		static WORD_REGEX: Lazy<Regex> =
 			Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
 
-		let tokens = WORD_REGEX.find_iter(text);
+		let tokens = find_words(text);
 
 		// ~~ indicate flag
 		let mut prev = Vec::with_capacity(self.state_size + 1);
 		prev.push("~~START");
-		for t in tokens {
+		for t in tokens.iter() {
 			for i in 1..=prev.len() {
 				let pslice = &prev[(prev.len() - i)..];
 
@@ -155,5 +155,61 @@ impl ChainItem {
 			// get a random item from the Vec
 			.choose(&mut rand::thread_rng())
 			.unwrap()
+	}
+}
+
+// (\w|\d|'|-)+(\.|!|\?)*
+fn find_words<'a>(text: &'a str) -> Vec<String> {
+	let mut buf: Vec<char> = Vec::new();
+	let mut res: Vec<String> = Vec::new();
+	let mut in_word = false;
+	let mut post_word = false;
+
+	for c in text.chars() {
+		if !post_word && (c.is_alphanumeric() || c == '\'' || c == '-') {
+			buf.push(c);
+			in_word = true;
+		} else if in_word {
+			if c == '.' || c == '!' || c == '?' {
+				buf.push(c);
+				post_word = true;
+			} else {
+				res.push(buf.iter().collect());
+				buf.clear();
+				in_word = false;
+				post_word = false;
+
+				if c.is_alphanumeric() || c == '\'' || c == '-' {
+					buf.push(c);
+					in_word = true;
+				}
+			}
+		}
+	}
+
+	if !buf.is_empty() {
+		res.push(buf.iter().collect());
+	}
+
+	return res;
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn parser() {
+		let word_regex = Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap();
+
+		let text = "asfd asa... lmao.lorem swag!!?? kek     	p bla,bla ğ!.?ü";
+
+		assert_eq!(
+			find_words(text),
+			word_regex
+				.find_iter(text)
+				.map(|m| m.as_str().to_string())
+				.collect::<Vec<String>>()
+		);
 	}
 }
