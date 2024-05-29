@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use hashbrown::HashMap;
 use once_cell::sync::Lazy;
 use rand::seq::SliceRandom;
@@ -29,29 +31,33 @@ impl MarkovChain {
 	pub fn add_text(&mut self, text: &str) {
 		let tokens = find_words(text);
 
-		// ~~ indicate flag
-		let mut prev = Vec::with_capacity(self.state_size + 1);
-		prev.push("~~START");
+		let mut prev: VecDeque<&str> = VecDeque::with_capacity(self.state_size + 100);
+		let mut prev_buf: String= String::with_capacity(255);
 		for t in tokens.iter() {
 			for i in 1..=prev.len() {
-				let pslice = &prev[(prev.len() - i)..];
+				prev_buf.clear();
+				for (i, s) in prev.iter().rev().take(i).rev().enumerate() {
+					if i > 0 {
+						prev_buf.push(' ')
+					}
 
-				let pstr = pslice.join(" ");
+					prev_buf.push_str(s);
+				};
 
 				// find_iter() doesn't return an iterator of "String"s but "Match"es. Must be converted manually.
 				let t = ustr(t.as_str());
 
-				if let Some(ci) = self.items.get_mut(&pstr) {
+				if let Some(ci) = self.items.get_mut(&prev_buf) {
 					ci.add(t);
 				} else {
-					self.items.insert(pstr, ChainItem::new(t));
+					self.items.insert(prev_buf.clone(), ChainItem::new(t));
 				}
 			}
 
-			prev.push(t.as_str());
-			if prev.len() > self.state_size {
-				prev.remove(0);
+			if prev.len() == self.state_size {
+				prev.pop_front();
 			}
+			prev.push_back(t.as_str());
 		}
 	}
 
@@ -81,17 +87,17 @@ impl MarkovChain {
 		let mut res = String::new();
 
 		// ~~ indicate flag
-		let mut prev = Vec::with_capacity(self.state_size + 1);
+		let mut prev = Vec::with_capacity(self.state_size);
 		for _ in 0..n {
 			let next = self.next_step(&prev);
 
 			res.push_str(&next);
 			res.push(' ');
 
-			prev.push(next.as_str());
-			if prev.len() > self.state_size {
+			if prev.len() == self.state_size {
 				prev.remove(0);
 			}
+			prev.push(next.as_str());
 		}
 
 		res.pop();
@@ -120,10 +126,10 @@ impl MarkovChain {
 			res.push_str(&next);
 			res.push(' ');
 
-			prev.push(next.as_str());
-			if prev.len() > self.state_size {
+			if prev.len() == self.state_size {
 				prev.remove(0);
 			}
+			prev.push(next.as_str());
 		}
 		res.pop();
 
