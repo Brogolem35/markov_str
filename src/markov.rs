@@ -6,12 +6,19 @@ use rand::seq::SliceRandom;
 use regex::Regex;
 use ustr::{ustr, Ustr};
 
+/// Represents a Markov Chain that is designed to generate text.
+/// 
+/// [Wikipedia](https://en.wikipedia.org/wiki/Markov_chain)
 pub struct MarkovChain {
 	pub items: HashMap<String, ChainItem>,
 	pub state_size: usize,
 }
 
 impl MarkovChain {
+	/// Create an empty MarkovChain.
+	///
+	/// The hash map of the MarkovChain is initially created with a capacity of 0, so it will not allocate until it
+	/// is first inserted into.
 	#[allow(dead_code)]
 	pub fn new(state_size: usize) -> MarkovChain {
 		MarkovChain {
@@ -20,6 +27,10 @@ impl MarkovChain {
 		}
 	}
 
+	/// Create an empty `HashMap` with the specified capacity.
+	///
+	/// The hash map of the MarkovChain will be able to hold at least `capacity` elements without
+	/// reallocating. If `capacity` is 0, the hash map will not allocate.
 	pub fn with_capacity(state_size: usize, capacity: usize) -> MarkovChain {
 		MarkovChain {
 			items: HashMap::with_capacity(capacity),
@@ -27,12 +38,12 @@ impl MarkovChain {
 		}
 	}
 
-	/// Generates Markov Chain from given string
+	/// Add text as training data.
 	pub fn add_text(&mut self, text: &str) {
 		let tokens = find_words(text);
 
 		let mut prev: VecDeque<&str> = VecDeque::with_capacity(self.state_size + 100);
-		let mut prev_buf: String= String::with_capacity(255);
+		let mut prev_buf: String = String::with_capacity(255);
 		for t in tokens.iter() {
 			for i in 1..=prev.len() {
 				prev_buf.clear();
@@ -42,9 +53,8 @@ impl MarkovChain {
 					}
 
 					prev_buf.push_str(s);
-				};
+				}
 
-				// find_iter() doesn't return an iterator of "String"s but "Match"es. Must be converted manually.
 				let t = ustr(t.as_str());
 
 				if let Some(ci) = self.items.get_mut(&prev_buf) {
@@ -61,6 +71,7 @@ impl MarkovChain {
 		}
 	}
 
+	/// Return an appropriate next step for the previous state.
 	pub fn next_step(&self, prev: &[&str]) -> Ustr {
 		for i in 0..prev.len() {
 			let pslice = &prev[i..];
@@ -82,11 +93,13 @@ impl MarkovChain {
 			.get_rand()
 	}
 
+	/// Generate text of given length.
+	///
+	/// First state is choosen randomly.
 	#[allow(dead_code)]
 	pub fn generate(&self, n: usize) -> String {
 		let mut res = String::new();
 
-		// ~~ indicate flag
 		let mut prev = Vec::with_capacity(self.state_size);
 		for _ in 0..n {
 			let next = self.next_step(&prev);
@@ -105,6 +118,7 @@ impl MarkovChain {
 		res
 	}
 
+	/// Generate text of given length, with accordance to the given starting value.
 	pub fn generate_start(&self, start: &str, n: usize) -> String {
 		static WORD_REGEX: Lazy<Regex> =
 			Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
@@ -137,20 +151,23 @@ impl MarkovChain {
 	}
 }
 
-/// Wrapper for Vec<Ustr> to make some operations easier
+/// Wrapper for Vec<Ustr> to make some operations easier.
 pub struct ChainItem {
 	pub items: Vec<Ustr>,
 }
 
 impl ChainItem {
+	/// Create a ChainItem, which will also contain `s`.
 	pub fn new(s: Ustr) -> ChainItem {
 		ChainItem { items: vec![s] }
 	}
 
+	/// Add item.
 	pub fn add(&mut self, s: Ustr) {
 		self.items.push(s);
 	}
 
+	/// Get a random item.
 	pub fn get_rand(&self) -> Ustr {
 		*self.items
 			// get a random item from the Vec
@@ -159,7 +176,7 @@ impl ChainItem {
 	}
 }
 
-// (\w|\d|'|-)+(\.|!|\?)*
+/// `(\w|\d|'|-)+(\.|!|\?)*`
 fn find_words<'a>(text: &'a str) -> Vec<String> {
 	let mut buf = String::with_capacity(255);
 	let mut res: Vec<String> = Vec::with_capacity(2000000);
