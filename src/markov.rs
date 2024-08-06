@@ -9,24 +9,26 @@ use ustr::{ustr, Ustr};
 /// Represents a Markov Chain that is designed to generate text.
 ///
 /// [Wikipedia](https://en.wikipedia.org/wiki/Markov_chain)
-pub struct MarkovChain {
+pub struct MarkovChain<'a> {
 	pub items: HashMap<String, ChainItem>,
 	pub state_size: usize,
+	regex: &'a Regex,
 }
 
 static WORD_REGEX: Lazy<Regex> =
 	Lazy::new(|| Regex::new(r"(\p{Alphabetic}|\d)(\p{Alphabetic}|\d|'|-)*").unwrap());
 
-impl MarkovChain {
+impl<'a> MarkovChain<'a> {
 	/// Create an empty MarkovChain.
 	///
 	/// The hash map of the MarkovChain is initially created with a capacity of 0, so it will not allocate until it
 	/// is first inserted into.
 	#[allow(dead_code)]
-	pub fn new(state_size: usize) -> MarkovChain {
+	pub fn new(state_size: usize, regex: &Regex) -> MarkovChain {
 		MarkovChain {
 			items: HashMap::<String, ChainItem>::new(),
 			state_size,
+			regex,
 		}
 	}
 
@@ -34,10 +36,11 @@ impl MarkovChain {
 	///
 	/// The hash map of the MarkovChain will be able to hold at least `capacity` elements without
 	/// reallocating. If `capacity` is 0, the hash map will not allocate.
-	pub fn with_capacity(state_size: usize, capacity: usize) -> MarkovChain {
+	pub fn with_capacity(state_size: usize, capacity: usize, regex: &Regex) -> MarkovChain {
 		MarkovChain {
 			items: HashMap::with_capacity(capacity),
 			state_size,
+			regex,
 		}
 	}
 
