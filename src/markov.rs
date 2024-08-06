@@ -7,12 +7,15 @@ use regex::Regex;
 use ustr::{ustr, Ustr};
 
 /// Represents a Markov Chain that is designed to generate text.
-/// 
+///
 /// [Wikipedia](https://en.wikipedia.org/wiki/Markov_chain)
 pub struct MarkovChain {
 	pub items: HashMap<String, ChainItem>,
 	pub state_size: usize,
 }
+
+static WORD_REGEX: Lazy<Regex> =
+	Lazy::new(|| Regex::new(r"(\p{Alphabetic}|\d)(\p{Alphabetic}|\d|'|-)*").unwrap());
 
 impl MarkovChain {
 	/// Create an empty MarkovChain.
@@ -40,11 +43,11 @@ impl MarkovChain {
 
 	/// Add text as training data.
 	pub fn add_text(&mut self, text: &str) {
-		let tokens = find_words(text);
+		let tokens = WORD_REGEX.find_iter(text);
 
 		let mut prev: VecDeque<&str> = VecDeque::with_capacity(self.state_size + 100);
 		let mut prev_buf: String = String::with_capacity(255);
-		for t in tokens.iter() {
+		for t in tokens {
 			for i in 1..=prev.len() {
 				prev_buf.clear();
 				for (i, s) in prev.iter().rev().take(i).rev().enumerate() {
@@ -120,9 +123,6 @@ impl MarkovChain {
 
 	/// Generate text of given length, with accordance to the given starting value.
 	pub fn generate_start(&self, start: &str, n: usize) -> String {
-		static WORD_REGEX: Lazy<Regex> =
-			Lazy::new(|| Regex::new(r"(\w|\d|'|-)+(\.|!|\?)*").unwrap());
-
 		let mut res = String::new();
 
 		let mut prev: Vec<&str> = WORD_REGEX
@@ -174,43 +174,6 @@ impl ChainItem {
 			.choose(&mut rand::thread_rng())
 			.unwrap()
 	}
-}
-
-/// `(\w|\d|'|-)+(\.|!|\?)*`
-fn find_words<'a>(text: &'a str) -> Vec<String> {
-	let mut buf = String::with_capacity(255);
-	let mut res: Vec<String> = Vec::with_capacity(2000000);
-	let mut in_word = false;
-	let mut post_word = false;
-
-	for c in text.chars() {
-		if !post_word && (c.is_alphanumeric() || c == '\'' || c == '-') {
-			buf.push(c);
-			in_word = true;
-		} else if in_word {
-			if c == '.' || c == '!' || c == '?' {
-				buf.push(c);
-				post_word = true;
-			} else {
-				res.push(buf.clone());
-				buf.clear();
-				in_word = false;
-				post_word = false;
-
-				if c.is_alphanumeric() || c == '\'' || c == '-' {
-					buf.push(c);
-					in_word = true;
-				}
-			}
-		}
-	}
-
-	if !buf.is_empty() {
-		res.push(buf.clone());
-		buf.clear();
-	}
-
-	return res;
 }
 
 #[cfg(test)]
