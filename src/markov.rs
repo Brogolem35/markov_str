@@ -46,7 +46,7 @@ impl<'a> MarkovChain<'a> {
 
 	/// Add text as training data.
 	pub fn add_text(&mut self, text: &str) {
-		let tokens = WORD_REGEX.find_iter(text);
+		let tokens = self.regex.find_iter(text);
 
 		let mut prev: VecDeque<&str> = VecDeque::with_capacity(self.state_size + 100);
 		let mut prev_buf: String = String::with_capacity(255);
