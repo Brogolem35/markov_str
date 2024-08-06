@@ -33,7 +33,7 @@ fn main() {
 	let contents = files.filter_map(|f| read_to_string(f.path()).ok());
 
 	// Creating the Markov Chain
-	let markov_chain = contents.fold(MarkovChain::with_capacity(2, 8_000_000), |mut a, s| {
+	let markov_chain = contents.fold(MarkovChain::with_capacity(2, 8_000_000, &WORD_REGEX), |mut a, s| {
 		a.add_text(&s);
 		a
 	});
