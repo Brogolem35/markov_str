@@ -15,7 +15,7 @@ pub struct MarkovChain<'a> {
 	regex: &'a Regex,
 }
 
-static WORD_REGEX: Lazy<Regex> =
+pub static WORD_REGEX: Lazy<Regex> =
 	Lazy::new(|| Regex::new(r"(\p{Alphabetic}|\d)(\p{Alphabetic}|\d|'|-)*").unwrap());
 
 impl<'a> MarkovChain<'a> {
