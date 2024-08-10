@@ -49,22 +49,21 @@ impl MarkovChain {
 
 	/// Add text as training data.
 	pub fn add_text(&mut self, text: &str) {
-		let tokens = self.regex.find_iter(text);
+		let tokens: Vec<_> = self.regex.find_iter(text).collect();
 
-		let mut prev: VecDeque<&str> = VecDeque::with_capacity(self.state_size + 100);
 		let mut prev_buf: String = String::with_capacity(255);
-		for t in tokens {
-			for i in 1..=prev.len() {
+		for t in tokens.windows(tokens.len().min(self.state_size + 1)) {
+			for i in 1..t.len() {
 				prev_buf.clear();
-				for (i, s) in prev.iter().rev().take(i).rev().enumerate() {
+				for (i, s) in t.iter().rev().skip(1).take(i).rev().enumerate() {
 					if i > 0 {
 						prev_buf.push(' ')
 					}
 
-					prev_buf.push_str(s);
+					prev_buf.push_str(s.as_str());
 				}
 
-				let t = self.cache.get_or_intern(t.as_str());
+				let t = self.cache.get_or_intern(t.last().unwrap().as_str());
 
 				if let Some(ci) = self.items.get_mut(&prev_buf) {
 					ci.add(t);
@@ -72,11 +71,6 @@ impl MarkovChain {
 					self.items.insert(prev_buf.clone(), ChainItem::new(t));
 				}
 			}
-
-			if prev.len() == self.state_size {
-				prev.pop_front();
-			}
-			prev.push_back(t.as_str());
 		}
 	}
 
