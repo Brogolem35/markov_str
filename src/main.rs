@@ -45,5 +45,5 @@ fn main() {
 		println!("{}", markov_chain.generate_start("among the       ", 25));
 	}
 
-	std::mem::forget(markov_chain);
+	// std::mem::forget(markov_chain);
 }

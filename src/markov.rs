@@ -1,10 +1,10 @@
 use std::collections::VecDeque;
 
 use hashbrown::HashMap;
+use lasso::{Rodeo, Spur};
 use once_cell::sync::Lazy;
 use rand::seq::SliceRandom;
 use regex::Regex;
-use ustr::{ustr, Ustr};
 
 /// Represents a Markov Chain that is designed to generate text.
 ///
@@ -13,6 +13,7 @@ pub struct MarkovChain {
 	pub items: HashMap<String, ChainItem>,
 	pub state_size: usize,
 	regex: Regex,
+	pub cache: Rodeo,
 }
 
 pub static WORD_REGEX: Lazy<Regex> =
@@ -29,6 +30,7 @@ impl MarkovChain {
 			items: HashMap::<String, ChainItem>::new(),
 			state_size,
 			regex,
+			cache: Rodeo::new(),
 		}
 	}
 
@@ -41,6 +43,7 @@ impl MarkovChain {
 			items: HashMap::with_capacity(capacity),
 			state_size,
 			regex,
+			cache: Rodeo::new(),
 		}
 	}
 
@@ -61,7 +64,7 @@ impl MarkovChain {
 					prev_buf.push_str(s);
 				}
 
-				let t = ustr(t.as_str());
+				let t = self.cache.get_or_intern(t.as_str());
 
 				if let Some(ci) = self.items.get_mut(&prev_buf) {
 					ci.add(t);
@@ -78,7 +81,7 @@ impl MarkovChain {
 	}
 
 	/// Return an appropriate next step for the previous state.
-	pub fn next_step(&self, prev: &[&str]) -> Ustr {
+	pub fn next_step(&self, prev: &[&str]) -> Spur {
 		for i in 0..prev.len() {
 			let pslice = &prev[i..];
 
@@ -109,14 +112,15 @@ impl MarkovChain {
 		let mut prev = Vec::with_capacity(self.state_size);
 		for _ in 0..n {
 			let next = self.next_step(&prev);
+			let next = self.cache.resolve(&next);
 
-			res.push_str(&next);
+			res.push_str(next);
 			res.push(' ');
 
 			if prev.len() == self.state_size {
 				prev.remove(0);
 			}
-			prev.push(next.as_str());
+			prev.push(next);
 		}
 
 		res.pop();
@@ -140,13 +144,15 @@ impl MarkovChain {
 
 		for _ in 0..n {
 			let next = self.next_step(&prev);
+			let next = self.cache.resolve(&next);
+
 			res.push_str(&next);
 			res.push(' ');
 
 			if prev.len() == self.state_size {
 				prev.remove(0);
 			}
-			prev.push(next.as_str());
+			prev.push(next);
 		}
 		res.pop();
 
@@ -156,22 +162,22 @@ impl MarkovChain {
 
 /// Wrapper for Vec<Ustr> to make some operations easier.
 pub struct ChainItem {
-	pub items: Vec<Ustr>,
+	pub items: Vec<Spur>,
 }
 
 impl ChainItem {
 	/// Create a ChainItem, which will also contain `s`.
-	pub fn new(s: Ustr) -> ChainItem {
+	pub fn new(s: Spur) -> ChainItem {
 		ChainItem { items: vec![s] }
 	}
 
 	/// Add item.
-	pub fn add(&mut self, s: Ustr) {
+	pub fn add(&mut self, s: Spur) {
 		self.items.push(s);
 	}
 
 	/// Get a random item.
-	pub fn get_rand(&self) -> Ustr {
+	pub fn get_rand(&self) -> Spur {
 		*self.items
 			// get a random item from the Vec
 			.choose(&mut rand::thread_rng())
