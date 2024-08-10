@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 use hashbrown::HashMap;
-use lasso::{Rodeo, Spur};
+use lasso::{Capacity, Rodeo, Spur};
 use once_cell::sync::Lazy;
 use rand::seq::SliceRandom;
 use regex::Regex;
@@ -43,7 +43,7 @@ impl MarkovChain {
 			items: HashMap::with_capacity(capacity),
 			state_size,
 			regex,
-			cache: Rodeo::new(),
+			cache: Rodeo::with_capacity(Capacity::for_strings(capacity)),
 		}
 	}
 
