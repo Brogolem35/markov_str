@@ -53,6 +53,8 @@ impl MarkovChain {
 
 		let mut prev_buf: String = String::with_capacity(255);
 		for t in tokens.windows(tokens.len().min(self.state_size + 1)) {
+			let rel = self.cache.get_or_intern(t.last().unwrap().as_str());
+
 			for i in 1..t.len() {
 				prev_buf.clear();
 				for (i, s) in t.iter().rev().skip(1).take(i).rev().enumerate() {
@@ -63,12 +65,10 @@ impl MarkovChain {
 					prev_buf.push_str(s.as_str());
 				}
 
-				let t = self.cache.get_or_intern(t.last().unwrap().as_str());
-
 				if let Some(ci) = self.items.get_mut(&prev_buf) {
-					ci.add(t);
+					ci.add(rel);
 				} else {
-					self.items.insert(prev_buf.clone(), ChainItem::new(t));
+					self.items.insert(prev_buf.clone(), ChainItem::new(rel));
 				}
 			}
 		}
