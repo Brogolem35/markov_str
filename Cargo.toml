@@ -1,5 +1,5 @@
 [package]
-name = "markov-chain"
+name = "markov_str"
 version = "0.1.0"
 edition = "2021"
 

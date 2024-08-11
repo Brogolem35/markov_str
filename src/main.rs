@@ -1,6 +1,4 @@
-mod markov;
-
-use markov::*;
+use markov_str::*;
 use regex::Regex;
 use std::fs::{self, read_to_string};
 
