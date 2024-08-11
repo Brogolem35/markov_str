@@ -120,7 +120,7 @@ impl MarkovChain {
 	pub fn generate_start(&self, start: &str, n: usize) -> String {
 		let mut res = String::new();
 
-		let mut prev: Vec<&str> = WORD_REGEX
+		let mut prev: Vec<&str> = self.regex
 			.find_iter(start)
 			.map(|m| m.as_str())
 			.collect::<Vec<&str>>()
