@@ -1,5 +1,3 @@
-use std::collections::VecDeque;
-
 use hashbrown::HashMap;
 use lasso::{Capacity, Rodeo, Spur};
 use once_cell::sync::Lazy;
