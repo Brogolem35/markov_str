@@ -1,10 +1,7 @@
 mod markov;
 
 use markov::*;
-use std::{
-	env,
-	fs::{self, read_to_string},
-};
+use std::fs::{self, read_to_string};
 
 #[cfg(not(target_env = "msvc"))]
 use tikv_jemallocator::Jemalloc;
@@ -14,8 +11,7 @@ use tikv_jemallocator::Jemalloc;
 static GLOBAL: Jemalloc = Jemalloc;
 
 fn main() {
-	let home_dir = env::var("HOME").expect("HOME Environment Variable not found");
-	let training_path = home_dir + "/markov_chain" + "/training";
+	let training_path = "data";
 
 	// Gets the paths of evey file and directory in the training_path.
 	let tpaths = fs::read_dir(&training_path)
