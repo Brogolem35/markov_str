@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 hashbrown = "0.14.5"
 lasso = {version = "0.7.2", features = ["ahasher", "inline-more"]}
-once_cell = "1.19.0"
 rand = "0.8.5"
 regex = "1.10.6"
 
