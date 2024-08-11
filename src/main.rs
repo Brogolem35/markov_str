@@ -3,12 +3,12 @@ mod markov;
 use markov::*;
 use std::fs::{self, read_to_string};
 
-#[cfg(not(target_env = "msvc"))]
-use tikv_jemallocator::Jemalloc;
+// #[cfg(not(target_env = "msvc"))]
+// use tikv_jemallocator::Jemalloc;
 
-#[cfg(not(target_env = "msvc"))]
-#[global_allocator]
-static GLOBAL: Jemalloc = Jemalloc;
+// #[cfg(not(target_env = "msvc"))]
+// #[global_allocator]
+// static GLOBAL: Jemalloc = Jemalloc;
 
 fn main() {
 	let training_path = "data";
@@ -43,6 +43,4 @@ fn main() {
 	for _ in 0..10 {
 		println!("{}", markov_chain.generate_start("among the       ", 25));
 	}
-
-	// std::mem::forget(markov_chain);
 }

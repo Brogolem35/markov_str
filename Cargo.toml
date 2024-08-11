@@ -13,8 +13,8 @@ rand = "0.8.5"
 regex = "1.10.4"
 ustr = "1.0.0"
 
-[target.'cfg(not(target_env = "msvc"))'.dependencies]
-tikv-jemallocator = "0.5"
+# [target.'cfg(not(target_env = "msvc"))'.dependencies]
+# tikv-jemallocator = "0.6"
 
 [package.metadata.clippy]
 # This sets all pedantic lints to be treated as errors
