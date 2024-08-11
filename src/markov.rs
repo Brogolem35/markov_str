@@ -15,10 +15,10 @@ pub struct MarkovChain {
 }
 
 impl MarkovChain {
-	/// Create an empty MarkovChain.
+	/// Creates an empty MarkovChain.
 	///
-	/// The hash map of the MarkovChain is initially created with a capacity of 0, so it will not allocate until it
-	/// is first inserted into.
+	/// The hashmap and the cache of the MarkovChain is initially created with the capacity of 0.
+	/// It will not allocate until the first insertion.
 	#[allow(dead_code)]
 	pub fn new(state_size: usize, regex: Regex) -> MarkovChain {
 		MarkovChain {
@@ -29,9 +29,9 @@ impl MarkovChain {
 		}
 	}
 
-	/// Create an empty `HashMap` with the specified capacity.
+	/// Creates an empty MarkovChain with the specified capacity.
 	///
-	/// The hash map of the MarkovChain will be able to hold at least `capacity` elements without
+	/// The hashmap and the cache of the MarkovChain will be able to hold at least `capacity` elements without
 	/// reallocating. If `capacity` is 0, the hash map will not allocate.
 	pub fn with_capacity(state_size: usize, capacity: usize, regex: Regex) -> MarkovChain {
 		MarkovChain {
@@ -42,7 +42,7 @@ impl MarkovChain {
 		}
 	}
 
-	/// Add text as training data.
+	/// Adds text as training data. The tokens will be created with the regex of the MarkovChain.
 	pub fn add_text(&mut self, text: &str) {
 		let tokens: Vec<_> = self.regex.find_iter(text).collect();
 
@@ -69,7 +69,7 @@ impl MarkovChain {
 		}
 	}
 
-	/// Return an appropriate next step for the previous state.
+	/// Returns the appropriate next step for the given previous state.
 	pub fn next_step(&self, prev: &[&str]) -> Spur {
 		for i in 0..prev.len() {
 			let pslice = &prev[i..];
@@ -91,7 +91,7 @@ impl MarkovChain {
 			.get_rand()
 	}
 
-	/// Generate text of given length.
+	/// Generates text of given length.
 	///
 	/// First state is choosen randomly.
 	#[allow(dead_code)]
@@ -117,7 +117,7 @@ impl MarkovChain {
 		res
 	}
 
-	/// Generate text of given length, with accordance to the given starting value.
+	/// Generates text of given length, with accordance to the given starting value.
 	pub fn generate_start(&self, start: &str, n: usize) -> String {
 		let mut res = String::new();
 
@@ -148,44 +148,48 @@ impl MarkovChain {
 		res
 	}
 
+	/// Returns the number of states the chain has.
 	#[inline]
 	pub fn len(&self) -> usize {
 		self.items.len()
 	}
 
+	/// Returns the number of string that are interned in cache.
 	#[inline]
 	pub fn cache_len(&self) -> usize {
 		self.cache.len()
 	}
 
+	/// Returns the state size.
 	#[inline]
 	pub fn state_size(&self) -> usize {
 		self.state_size
 	}
 
+	/// Returns a copy of the regex.
 	#[inline]
 	pub fn regex(&self) -> Regex {
 		self.regex.clone()
 	}
 }
 
-/// Wrapper for Vec<Ustr> to make some operations easier.
+/// Wrapper for Vec<Spur> to make some operations easier.
 struct ChainItem {
 	items: Vec<Spur>,
 }
 
 impl ChainItem {
-	/// Create a ChainItem, which will also contain `s`.
+	/// Creates a ChainItem, which will also contain `s`.
 	fn new(s: Spur) -> ChainItem {
 		ChainItem { items: vec![s] }
 	}
 
-	/// Add item.
+	/// Adds item.
 	fn add(&mut self, s: Spur) {
 		self.items.push(s);
 	}
 
-	/// Get a random item.
+	/// Gets a random item.
 	fn get_rand(&self) -> Spur {
 		*self.items
 			// get a random item from the Vec
@@ -194,6 +198,7 @@ impl ChainItem {
 	}
 }
 
+/// Recommended Regex for general use.
 pub static WORD_REGEX: Lazy<Regex> =
 	Lazy::new(|| Regex::new(r"(\p{Alphabetic}|\d)(\p{Alphabetic}|\d|'|-)*(\.|!|\?)?").unwrap());
 
