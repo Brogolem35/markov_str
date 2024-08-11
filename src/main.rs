@@ -14,7 +14,7 @@ fn main() {
 	let training_path = "data";
 
 	// Gets the paths of evey file and directory in the training_path.
-	let tpaths = fs::read_dir(&training_path)
+	let tpaths = fs::read_dir(training_path)
 		.unwrap_or_else(|_| panic!("Can't read files from: {}", training_path));
 
 	// Only the files remain
