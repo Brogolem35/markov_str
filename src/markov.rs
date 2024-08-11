@@ -147,6 +147,16 @@ impl MarkovChain {
 
 		res
 	}
+
+	#[inline]
+	pub fn len(&self) -> usize {
+		self.items.len()
+	}
+
+	#[inline]
+	pub fn cache_len(&self) -> usize {
+		self.cache.len()
+	}
 }
 
 /// Wrapper for Vec<Ustr> to make some operations easier.

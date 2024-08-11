@@ -38,7 +38,7 @@ fn main() {
 	);
 
 	// Generation
-	println!("{}", markov_chain.items.len());
+	println!("{}", markov_chain.len());
 
 	for _ in 0..10 {
 		println!("{}", markov_chain.generate_start("among the       ", 25));
