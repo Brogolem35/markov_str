@@ -8,10 +8,10 @@ use regex::Regex;
 ///
 /// [Wikipedia](https://en.wikipedia.org/wiki/Markov_chain)
 pub struct MarkovChain {
-	pub items: HashMap<String, ChainItem>,
-	pub state_size: usize,
+	items: HashMap<String, ChainItem>,
+	state_size: usize,
 	regex: Regex,
-	pub cache: Rodeo,
+	cache: Rodeo,
 }
 
 impl MarkovChain {
@@ -160,23 +160,23 @@ impl MarkovChain {
 }
 
 /// Wrapper for Vec<Ustr> to make some operations easier.
-pub struct ChainItem {
-	pub items: Vec<Spur>,
+struct ChainItem {
+	items: Vec<Spur>,
 }
 
 impl ChainItem {
 	/// Create a ChainItem, which will also contain `s`.
-	pub fn new(s: Spur) -> ChainItem {
+	fn new(s: Spur) -> ChainItem {
 		ChainItem { items: vec![s] }
 	}
 
 	/// Add item.
-	pub fn add(&mut self, s: Spur) {
+	fn add(&mut self, s: Spur) {
 		self.items.push(s);
 	}
 
 	/// Get a random item.
-	pub fn get_rand(&self) -> Spur {
+	fn get_rand(&self) -> Spur {
 		*self.items
 			// get a random item from the Vec
 			.choose(&mut rand::thread_rng())
