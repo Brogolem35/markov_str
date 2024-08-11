@@ -138,7 +138,7 @@ impl MarkovChain {
 			let next = self.next_step(&prev);
 			let next = self.cache.resolve(&next);
 
-			res.push_str(&next);
+			res.push_str(next);
 			res.push(' ');
 
 			if prev.len() == self.state_size {
