@@ -1,6 +1,7 @@
 mod markov;
 
 use markov::*;
+use regex::Regex;
 use std::fs::{self, read_to_string};
 
 // #[cfg(not(target_env = "msvc"))]
@@ -30,7 +31,7 @@ fn main() {
 
 	// Creating the Markov Chain
 	let markov_chain = contents.fold(
-		MarkovChain::with_capacity(2, 8_000_000, WORD_REGEX.clone()),
+		MarkovChain::with_capacity(2, 8_000_000, Regex::new(WORD_REGEX).unwrap()),
 		|mut a, s| {
 			a.add_text(&s);
 			a

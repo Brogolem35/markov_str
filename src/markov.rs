@@ -1,6 +1,5 @@
 use hashbrown::HashMap;
 use lasso::{Capacity, Rodeo, Spur};
-use once_cell::sync::Lazy;
 use rand::seq::SliceRandom;
 use regex::Regex;
 
@@ -199,8 +198,7 @@ impl ChainItem {
 }
 
 /// Recommended Regex for general use.
-pub static WORD_REGEX: Lazy<Regex> =
-	Lazy::new(|| Regex::new(r"(\p{Alphabetic}|\d)(\p{Alphabetic}|\d|'|-)*(\.|!|\?)?").unwrap());
+pub static WORD_REGEX: &str = r"(\p{Alphabetic}|\d)(\p{Alphabetic}|\d|'|-)*(\.|!|\?)?";
 
 #[cfg(test)]
 mod tests {
@@ -208,7 +206,8 @@ mod tests {
 
 	#[test]
 	fn regex1() {
-		let rres: Vec<_> = WORD_REGEX
+		let rres: Vec<_> = Regex::new(WORD_REGEX)
+			.unwrap()
 			.find_iter("lorem ipsum dolor")
 			.map(|m| m.as_str())
 			.collect();
@@ -218,7 +217,8 @@ mod tests {
 
 	#[test]
 	fn regex2() {
-		let rres: Vec<_> = WORD_REGEX
+		let rres: Vec<_> = Regex::new(WORD_REGEX)
+			.unwrap()
 			.find_iter("lor.em ips!um 'dolor")
 			.map(|m| m.as_str())
 			.collect();
@@ -228,7 +228,8 @@ mod tests {
 
 	#[test]
 	fn regex3() {
-		let rres: Vec<_> = WORD_REGEX
+		let rres: Vec<_> = Regex::new(WORD_REGEX)
+			.unwrap()
 			.find_iter("lorem ipsum dol_3or")
 			.map(|m| m.as_str())
 			.collect();
@@ -238,7 +239,8 @@ mod tests {
 
 	#[test]
 	fn regex4() {
-		let rres: Vec<_> = WORD_REGEX
+		let rres: Vec<_> = Regex::new(WORD_REGEX)
+			.unwrap()
 			.find_iter("123  1,23 1_2 2d3")
 			.map(|m| m.as_str())
 			.collect();
@@ -248,7 +250,8 @@ mod tests {
 
 	#[test]
 	fn regex5() {
-		let rres: Vec<_> = WORD_REGEX
+		let rres: Vec<_> = Regex::new(WORD_REGEX)
+			.unwrap()
 			.find_iter("ömür ğğğ 式 2d3")
 			.map(|m| m.as_str())
 			.collect();
