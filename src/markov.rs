@@ -157,10 +157,15 @@ impl MarkovChain {
 	pub fn cache_len(&self) -> usize {
 		self.cache.len()
 	}
-	
+
 	#[inline]
 	pub fn state_size(&self) -> usize {
 		self.state_size
+	}
+
+	#[inline]
+	pub fn regex(&self) -> Regex {
+		self.regex.clone()
 	}
 }
 
