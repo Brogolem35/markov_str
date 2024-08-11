@@ -14,9 +14,6 @@ pub struct MarkovChain {
 	pub cache: Rodeo,
 }
 
-pub static WORD_REGEX: Lazy<Regex> =
-	Lazy::new(|| Regex::new(r"(\p{Alphabetic}|\d)(\p{Alphabetic}|\d|'|-)*(\.|!|\?)?").unwrap());
-
 impl MarkovChain {
 	/// Create an empty MarkovChain.
 	///
@@ -176,6 +173,9 @@ impl ChainItem {
 			.unwrap()
 	}
 }
+
+pub static WORD_REGEX: Lazy<Regex> =
+	Lazy::new(|| Regex::new(r"(\p{Alphabetic}|\d)(\p{Alphabetic}|\d|'|-)*(\.|!|\?)?").unwrap());
 
 #[cfg(test)]
 mod tests {
