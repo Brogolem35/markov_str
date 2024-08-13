@@ -18,7 +18,6 @@ impl MarkovChain {
 	///
 	/// The hashmap and the cache of the MarkovChain is initially created with the capacity of 0.
 	/// It will not allocate until the first insertion.
-	#[allow(dead_code)]
 	pub fn new(state_size: usize, regex: Regex) -> MarkovChain {
 		MarkovChain {
 			items: HashMap::<String, ChainItem>::new(),
@@ -93,7 +92,6 @@ impl MarkovChain {
 	/// Generates text of given length.
 	///
 	/// First state is choosen randomly.
-	#[allow(dead_code)]
 	pub fn generate(&self, n: usize) -> String {
 		let mut res = String::new();
 
