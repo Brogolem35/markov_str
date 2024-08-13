@@ -122,7 +122,7 @@ impl MarkovChain {
 	}
 
 	/// Returns the appropriate next step for the given previous state.
-	/// 
+	///
 	/// Returns `None` if there is no state.
 	pub fn next_step(&self, prev: &[&str]) -> Option<Spur> {
 		for i in 0..prev.len() {
@@ -147,7 +147,7 @@ impl MarkovChain {
 
 	/// Generates text of given length.
 	/// First state is choosen randomly.
-	/// 
+	///
 	/// Returns `None` if there is no state.
 	pub fn generate(&self, n: usize) -> Option<String> {
 		let mut res = String::new();
@@ -172,7 +172,7 @@ impl MarkovChain {
 	}
 
 	/// Generates text of given length, with accordance to the given starting value.
-	/// 
+	///
 	/// Returns `None` if there is no state.
 	pub fn generate_start(&self, start: &str, n: usize) -> Option<String> {
 		let mut res = String::new();
@@ -248,7 +248,8 @@ impl ChainItem {
 
 	/// Gets a random item.
 	fn get_rand(&self) -> Option<Spur> {
-		let res = *self.items
+		let res = *self
+			.items
 			// get a random item from the Vec
 			.choose(&mut rand::thread_rng())?;
 

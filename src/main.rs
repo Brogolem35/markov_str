@@ -40,6 +40,9 @@ fn main() {
 	println!("{}", markov_chain.len());
 
 	for _ in 0..10 {
-		println!("{}", markov_chain.generate_start("among the       ", 25).unwrap());
+		println!(
+			"{}",
+			markov_chain.generate_start("among the       ", 25).unwrap()
+		);
 	}
 }
