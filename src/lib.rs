@@ -61,7 +61,7 @@ use regex::Regex;
 ///
 /// [Wikipedia](https://en.wikipedia.org/wiki/Markov_chain)
 pub struct MarkovChain {
-	items: HashMap<String, ChainItem>,
+	items: HashMap<Vec<Spur>, ChainItem>,
 	state_size: usize,
 	regex: Regex,
 	cache: Rodeo,
@@ -74,7 +74,7 @@ impl MarkovChain {
 	/// It will not allocate until the first insertion.
 	pub fn new(state_size: usize, regex: Regex) -> MarkovChain {
 		MarkovChain {
-			items: HashMap::<String, ChainItem>::new(),
+			items: HashMap::<Vec<Spur>, ChainItem>::new(),
 			state_size,
 			regex,
 			cache: Rodeo::new(),
@@ -96,26 +96,23 @@ impl MarkovChain {
 
 	/// Adds text as training data. The tokens will be created with the regex of the MarkovChain.
 	pub fn add_text(&mut self, text: &str) {
-		let tokens: Vec<_> = self.regex.find_iter(text).collect();
+		let tokens: Vec<_> = self
+			.regex
+			.find_iter(text)
+			.map(|t| self.cache.get_or_intern(t.as_str()))
+			.collect();
 
-		let mut prev_buf: String = String::with_capacity(255);
 		for t in tokens.windows(tokens.len().min(self.state_size + 1)) {
-			let rel = self.cache.get_or_intern(t.last().unwrap().as_str());
+			let rel = t.last().unwrap();
 
 			for i in 1..t.len() {
-				prev_buf.clear();
-				for (i, s) in t.iter().rev().skip(1).take(i).rev().enumerate() {
-					if i > 0 {
-						prev_buf.push(' ')
-					}
+				let prev: Vec<Spur> =
+					t.iter().rev().skip(1).take(i).rev().map(|s| *s).collect();
 
-					prev_buf.push_str(s.as_str());
-				}
-
-				if let Some(ci) = self.items.get_mut(&prev_buf) {
-					ci.add(rel);
+				if let Some(ci) = self.items.get_mut(&prev) {
+					ci.add(*rel);
 				} else {
-					self.items.insert(prev_buf.clone(), ChainItem::new(rel));
+					self.items.insert(prev, ChainItem::new(*rel));
 				}
 			}
 		}
@@ -130,8 +127,8 @@ impl MarkovChain {
 
 		let mut prev = Vec::with_capacity(self.state_size);
 		for _ in 0..n {
-			let next = self.next_step(&prev)?;
-			let next = self.cache.resolve(&next);
+			let next_spur = self.next_step(&prev)?;
+			let next = self.cache.resolve(&next_spur);
 
 			res.push_str(next);
 			res.push(' ');
@@ -139,7 +136,7 @@ impl MarkovChain {
 			if prev.len() == self.state_size {
 				prev.remove(0);
 			}
-			prev.push(next);
+			prev.push(next_spur);
 		}
 
 		res.pop();
@@ -153,7 +150,7 @@ impl MarkovChain {
 	pub fn generate_start(&self, start: &str, n: usize) -> Option<String> {
 		let mut res = String::new();
 
-		let mut prev: Vec<&str> = self
+		let mut prev: Vec<Spur> = self
 			.regex
 			.find_iter(start)
 			.map(|m| m.as_str())
@@ -162,11 +159,12 @@ impl MarkovChain {
 			.rev()
 			.take(2)
 			.rev()
+			.filter_map(|t| self.cache.get(t))
 			.collect();
 
 		for _ in 0..n {
-			let next = self.next_step(&prev)?;
-			let next = self.cache.resolve(&next);
+			let next_spur = self.next_step(&prev)?;
+			let next = self.cache.resolve(&next_spur);
 
 			res.push_str(next);
 			res.push(' ');
@@ -174,7 +172,7 @@ impl MarkovChain {
 			if prev.len() == self.state_size {
 				prev.remove(0);
 			}
-			prev.push(next);
+			prev.push(next_spur);
 		}
 		res.pop();
 
@@ -208,13 +206,11 @@ impl MarkovChain {
 	/// Returns the appropriate next step for the given previous state.
 	///
 	/// Returns `None` if there is no state.
-	fn next_step(&self, prev: &[&str]) -> Option<Spur> {
+	fn next_step(&self, prev: &[Spur]) -> Option<Spur> {
 		for i in 0..prev.len() {
 			let pslice = &prev[i..];
 
-			let pstr = pslice.join(" ");
-
-			if let Some(res) = self.items.get(&pstr) {
+			if let Some(res) = self.items.get(pslice) {
 				return Some(res.get_rand()?);
 			} else {
 				continue;
