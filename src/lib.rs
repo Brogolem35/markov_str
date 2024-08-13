@@ -1,15 +1,15 @@
 //! Fast and memory efficient Markov Chain implementation, optimized for text generation
-//! 
+//!
 //! Example
 //! -------
-//! 
+//!
 //! ```rust
 //! let training_path = "data";
-//! 
+//!
 //! // Gets the paths of evey file and directory in the training_path.
 //! let tpaths = fs::read_dir(training_path)
 //! 	.unwrap_or_else(|_| panic!("Can't read files from: {}", training_path));
-//! 
+//!
 //! // Only the files remain
 //! let files = tpaths
 //! 	.filter_map(|f| f.ok())
@@ -17,10 +17,10 @@
 //! 		Err(_) => false,
 //! 		Ok(f) => f.is_file(),
 //! 	});
-//! 
+//!
 //! // Reads every file into a string
 //! let contents = files.filter_map(|f| read_to_string(f.path()).ok());
-//! 
+//!
 //! // Creating the Markov Chain
 //! let markov_chain = contents.fold(
 //! 	MarkovChain::with_capacity(2, 8_000_000, Regex::new(WORD_REGEX).unwrap()),
@@ -29,29 +29,28 @@
 //! 		a
 //! 	},
 //! );
-//! 
+//!
 //! // Number of tokens
 //! println!("{}", markov_chain.len());
-//! 
+//!
 //! // Generation
 //! for _ in 0..10 {
 //! 	println!("{}", markov_chain.generate_start("among the       ", 25));
 //! }
 //! ```
-//! 
+//!
 //! This example is taken from the `src/main.rs`, you can run it by:
 //! ```
 //! ./get_data.sh
 //! cargo run --release
 //! ```
-//! 
+//!
 //! `./get_data.sh` will download the first 200 books from [Project Gutenberg](https://www.gutenberg.org/), which totals up to more than 100MBs of text.
-//! 
+//!
 //! License
 //! -------
-//! 
+//!
 //! markov_str is licensed under the MIT license. Feel free to fork and use however you like.
-
 
 use hashbrown::HashMap;
 use lasso::{Capacity, Rodeo, Spur};
@@ -123,36 +122,39 @@ impl MarkovChain {
 	}
 
 	/// Returns the appropriate next step for the given previous state.
-	pub fn next_step(&self, prev: &[&str]) -> Spur {
+	/// 
+	/// Returns `None` if there is no state.
+	pub fn next_step(&self, prev: &[&str]) -> Option<Spur> {
 		for i in 0..prev.len() {
 			let pslice = &prev[i..];
 
 			let pstr = pslice.join(" ");
 
 			if let Some(res) = self.items.get(&pstr) {
-				return res.get_rand();
+				return Some(res.get_rand()?);
 			} else {
 				continue;
 			}
 		}
 
-		self.items
+		Some(self
+			.items
 			.values()
 			.collect::<Vec<&ChainItem>>()
-			.choose(&mut rand::thread_rng())
-			.unwrap()
-			.get_rand()
+			.choose(&mut rand::thread_rng())?
+			.get_rand()?)
 	}
 
 	/// Generates text of given length.
-	///
 	/// First state is choosen randomly.
-	pub fn generate(&self, n: usize) -> String {
+	/// 
+	/// Returns `None` if there is no state.
+	pub fn generate(&self, n: usize) -> Option<String> {
 		let mut res = String::new();
 
 		let mut prev = Vec::with_capacity(self.state_size);
 		for _ in 0..n {
-			let next = self.next_step(&prev);
+			let next = self.next_step(&prev)?;
 			let next = self.cache.resolve(&next);
 
 			res.push_str(next);
@@ -166,14 +168,17 @@ impl MarkovChain {
 
 		res.pop();
 
-		res
+		Some(res)
 	}
 
 	/// Generates text of given length, with accordance to the given starting value.
-	pub fn generate_start(&self, start: &str, n: usize) -> String {
+	/// 
+	/// Returns `None` if there is no state.
+	pub fn generate_start(&self, start: &str, n: usize) -> Option<String> {
 		let mut res = String::new();
 
-		let mut prev: Vec<&str> = self.regex
+		let mut prev: Vec<&str> = self
+			.regex
 			.find_iter(start)
 			.map(|m| m.as_str())
 			.collect::<Vec<&str>>()
@@ -184,7 +189,7 @@ impl MarkovChain {
 			.collect();
 
 		for _ in 0..n {
-			let next = self.next_step(&prev);
+			let next = self.next_step(&prev)?;
 			let next = self.cache.resolve(&next);
 
 			res.push_str(next);
@@ -197,7 +202,7 @@ impl MarkovChain {
 		}
 		res.pop();
 
-		res
+		Some(res)
 	}
 
 	/// Returns the number of states the chain has.
@@ -242,11 +247,12 @@ impl ChainItem {
 	}
 
 	/// Gets a random item.
-	fn get_rand(&self) -> Spur {
-		*self.items
+	fn get_rand(&self) -> Option<Spur> {
+		let res = *self.items
 			// get a random item from the Vec
-			.choose(&mut rand::thread_rng())
-			.unwrap()
+			.choose(&mut rand::thread_rng())?;
+
+		Some(res)
 	}
 }
 
