@@ -36,7 +36,7 @@ println!("{}", markov_chain.len());
 
 // Generation
 for _ in 0..10 {
-	println!("{}", markov_chain.generate_start("among the       ", 25));
+	println!("{}", markov_chain.generate_start("among the       ", 25).unwrap());
 }
 ```
 
