@@ -102,17 +102,20 @@ impl MarkovChain {
 			.map(|t| self.cache.get_or_intern(t.as_str()))
 			.collect();
 
-		for t in tokens.windows(tokens.len().min(self.state_size + 1)) {
-			let rel = t.last().unwrap();
+		let mut prevbuf: Vec<Spur> = Vec::with_capacity(self.state_size);
+		for win in tokens.windows(tokens.len().min(self.state_size + 1)) {
+			let rel = win.last().unwrap();
 
-			for i in 1..t.len() {
-				let prev: Vec<Spur> =
-					t.iter().rev().skip(1).take(i).rev().map(|s| *s).collect();
+			for i in 1..win.len() {
+				prevbuf.clear();
+				for t in win.iter().rev().skip(1).take(i).rev() {
+					prevbuf.push(*t);
+				}
 
-				if let Some(ci) = self.items.get_mut(&prev) {
+				if let Some(ci) = self.items.get_mut(&prevbuf) {
 					ci.add(*rel);
 				} else {
-					self.items.insert(prev, ChainItem::new(*rel));
+					self.items.insert(prevbuf.clone(), ChainItem::new(*rel));
 				}
 			}
 		}
