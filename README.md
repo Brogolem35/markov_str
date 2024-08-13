@@ -40,7 +40,7 @@ for _ in 0..10 {
 }
 ```
 
-This example is taken from the src/main.rs, you can run it by:
+This example is taken from the `src/main.rs`, you can run it by:
 ```sh
 ./get_data.sh
 cargo run --release
