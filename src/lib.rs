@@ -121,30 +121,6 @@ impl MarkovChain {
 		}
 	}
 
-	/// Returns the appropriate next step for the given previous state.
-	///
-	/// Returns `None` if there is no state.
-	pub fn next_step(&self, prev: &[&str]) -> Option<Spur> {
-		for i in 0..prev.len() {
-			let pslice = &prev[i..];
-
-			let pstr = pslice.join(" ");
-
-			if let Some(res) = self.items.get(&pstr) {
-				return Some(res.get_rand()?);
-			} else {
-				continue;
-			}
-		}
-
-		Some(self
-			.items
-			.values()
-			.collect::<Vec<&ChainItem>>()
-			.choose(&mut rand::thread_rng())?
-			.get_rand()?)
-	}
-
 	/// Generates text of given length.
 	/// First state is choosen randomly.
 	///
@@ -227,6 +203,30 @@ impl MarkovChain {
 	#[inline]
 	pub fn regex(&self) -> Regex {
 		self.regex.clone()
+	}
+
+	/// Returns the appropriate next step for the given previous state.
+	///
+	/// Returns `None` if there is no state.
+	fn next_step(&self, prev: &[&str]) -> Option<Spur> {
+		for i in 0..prev.len() {
+			let pslice = &prev[i..];
+
+			let pstr = pslice.join(" ");
+
+			if let Some(res) = self.items.get(&pstr) {
+				return Some(res.get_rand()?);
+			} else {
+				continue;
+			}
+		}
+
+		Some(self
+			.items
+			.values()
+			.collect::<Vec<&ChainItem>>()
+			.choose(&mut rand::thread_rng())?
+			.get_rand()?)
 	}
 }
 
