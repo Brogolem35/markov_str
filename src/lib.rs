@@ -198,6 +198,12 @@ impl MarkovChain {
 		self.cache.len()
 	}
 
+	/// Returns if the chain is empty or not.
+	#[inline]
+	pub fn is_empty(&self) -> bool {
+		self.items.len() == 0
+	}
+
 	/// Returns the state size.
 	#[inline]
 	pub fn state_size(&self) -> usize {
