@@ -7,7 +7,7 @@
 //! use markov_str::*;
 //! use regex::Regex;
 //! use std::fs::{self, read_to_string};
-//! 
+//!
 //! let training_path = "data";
 //!
 //! // Gets the paths of evey file and directory in the training_path.
@@ -218,18 +218,17 @@ impl MarkovChain {
 			let pslice = &prev[i..];
 
 			if let Some(res) = self.items.get(pslice) {
-				return Some(res.get_rand()?);
+				return res.get_rand();
 			} else {
 				continue;
 			}
 		}
 
-		Some(self
-			.items
+		self.items
 			.values()
 			.collect::<Vec<&ChainItem>>()
 			.choose(&mut rand::thread_rng())?
-			.get_rand()?)
+			.get_rand()
 	}
 }
 
