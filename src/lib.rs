@@ -78,7 +78,7 @@ impl MarkovChain {
 	/// It will not allocate until the first insertion.
 	pub fn new(state_size: usize, regex: Regex) -> MarkovChain {
 		MarkovChain {
-			items: HashMap::<Vec<Spur>, ChainItem>::new(),
+			items: HashMap::new(),
 			state_size,
 			regex,
 			cache: Rodeo::new(),
