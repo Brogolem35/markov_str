@@ -106,6 +106,7 @@ impl MarkovChain {
 			.map(|t| self.cache.get_or_intern(t.as_str()))
 			.collect();
 
+		// Creating a preallocated buffer and filling and cleaning it instead of creating a new one every loop is way more efficient.
 		let mut prevbuf: Vec<Spur> = Vec::with_capacity(self.state_size);
 		for win in tokens.windows(tokens.len().min(self.state_size + 1)) {
 			let rel = win.last().unwrap();
