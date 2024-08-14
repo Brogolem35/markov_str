@@ -4,6 +4,10 @@
 //! -------
 //!
 //! ```rust
+//! use markov_str::*;
+//! use regex::Regex;
+//! use std::fs::{self, read_to_string};
+//! 
 //! let training_path = "data";
 //!
 //! // Gets the paths of evey file and directory in the training_path.
@@ -40,7 +44,7 @@
 //! ```
 //!
 //! This example is taken from the `src/main.rs`, you can run it by:
-//! ```
+//! ```ignore
 //! ./get_data.sh
 //! cargo run --release
 //! ```
