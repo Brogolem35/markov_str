@@ -262,6 +262,7 @@ pub static WORD_REGEX: &str = r"(\p{Alphabetic}|\d)(\p{Alphabetic}|\d|'|-)*(\.|!
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use regex::Regex;
 
 	#[test]
 	fn regex1() {
@@ -282,7 +283,7 @@ mod tests {
 			.map(|m| m.as_str())
 			.collect();
 
-		assert_eq!(rres, vec!["lor", "em", "ips", "um", "dolor"]);
+		assert_eq!(rres, vec!["lor.", "em", "ips!", "um", "dolor"]);
 	}
 
 	#[test]
