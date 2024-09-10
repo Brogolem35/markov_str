@@ -11,11 +11,19 @@ categories = ["text-processing"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+serialize = ["serde", "serde_regex", "serde_json_any_key", "hashbrown/serde", "lasso/serialize"]
+
 [dependencies]
 hashbrown = "0.14.5"
-lasso = {version = "0.7.2", features = ["ahasher", "inline-more"]}
+lasso = {version = "0.7.3", features = ["ahasher", "inline-more"]}
 rand = "0.8.5"
 regex = "1.10.6"
+serde = {version = "1.0.210",  features = ["derive"], optional = true}
+serde_regex = {version = "1.1.0", optional = true}
+serde_json_any_key = {version = "2.0.0", optional = true}
+
+serde_json = "1.0.62"
 
 # [target.'cfg(not(target_env = "msvc"))'.dependencies]
 # tikv-jemallocator = "0.6"
