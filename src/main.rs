@@ -1,4 +1,5 @@
 use markov_str::*;
+use rand::SeedableRng;
 use regex::Regex;
 use std::fs::{self, read_to_string};
 
@@ -39,10 +40,20 @@ fn main() {
 	// Generation
 	println!("{}", markov_chain.len());
 
+	// ThreadRng
 	for _ in 0..10 {
 		println!(
-			"{}",
-			markov_chain.generate_start("among the       ", 25).unwrap()
+			"ThreadRng: {}",
+			markov_chain.generate_start("among the       ", 25, &mut rand::thread_rng()).unwrap()
+		);
+	}
+	
+	// StdRng with seed
+	let mut rng = rand::rngs::StdRng::seed_from_u64(1337);
+	for _ in 0..10 {
+		println!(
+			"Seeded:{}",
+			markov_chain.generate_start("among the       ", 25, &mut rng).unwrap()
 		);
 	}
 }

@@ -58,7 +58,7 @@
 
 use hashbrown::HashMap;
 use lasso::{Capacity, Rodeo, Spur};
-use rand::seq::SliceRandom;
+use rand::{seq::SliceRandom, RngCore};
 use regex::Regex;
 
 /// Represents a Markov Chain that is designed to generate text.
@@ -130,12 +130,12 @@ impl MarkovChain {
 	/// First state is choosen randomly.
 	///
 	/// Returns `None` if there is no state.
-	pub fn generate(&self, n: usize) -> Option<String> {
+	pub fn generate(&self, n: usize, rng: &mut impl RngCore) -> Option<String> {
 		let mut res = String::new();
 
 		let mut prev = Vec::with_capacity(self.state_size);
 		for _ in 0..n {
-			let next_spur = self.next_step(&prev)?;
+			let next_spur = self.next_step(&prev, rng)?;
 			let next = self.cache.resolve(&next_spur);
 
 			res.push_str(next);
@@ -155,7 +155,7 @@ impl MarkovChain {
 	/// Generates text of given length, with accordance to the given starting value.
 	///
 	/// Returns `None` if there is no state.
-	pub fn generate_start(&self, start: &str, n: usize) -> Option<String> {
+	pub fn generate_start(&self, start: &str, n: usize, rng: &mut impl RngCore) -> Option<String> {
 		let mut res = String::new();
 
 		let mut prev: Vec<Spur> = self
@@ -171,7 +171,7 @@ impl MarkovChain {
 			.collect();
 
 		for _ in 0..n {
-			let next_spur = self.next_step(&prev)?;
+			let next_spur = self.next_step(&prev, rng)?;
 			let next = self.cache.resolve(&next_spur);
 
 			res.push_str(next);
@@ -220,12 +220,12 @@ impl MarkovChain {
 	/// Returns the appropriate next step for the given previous state.
 	///
 	/// Returns `None` if there is no state.
-	fn next_step(&self, prev: &[Spur]) -> Option<Spur> {
+	fn next_step(&self, prev: &[Spur], rng: &mut impl RngCore) -> Option<Spur> {
 		for i in 0..prev.len() {
 			let pslice = &prev[i..];
 
 			if let Some(res) = self.items.get(pslice) {
-				return res.get_rand();
+				return res.get_rand(rng);
 			} else {
 				continue;
 			}
@@ -234,8 +234,8 @@ impl MarkovChain {
 		self.items
 			.values()
 			.collect::<Vec<&ChainItem>>()
-			.choose(&mut rand::thread_rng())?
-			.get_rand()
+			.choose(rng)?
+			.get_rand(rng)
 	}
 }
 
@@ -256,11 +256,11 @@ impl ChainItem {
 	}
 
 	/// Gets a random item.
-	fn get_rand(&self) -> Option<Spur> {
+	fn get_rand(&self, rng: &mut impl RngCore) -> Option<Spur> {
 		let res = *self
 			.items
 			// get a random item from the Vec
-			.choose(&mut rand::thread_rng())?;
+			.choose(rng)?;
 
 		Some(res)
 	}
