@@ -1,5 +1,7 @@
 use markov_str::*;
 use regex::Regex;
+#[cfg(feature = "serialize")]
+use serde_json;
 use std::fs::{self, read_to_string};
 
 // #[cfg(not(target_env = "msvc"))]
@@ -44,5 +46,17 @@ fn main() {
 			"{}",
 			markov_chain.generate_start("among the       ", 25).unwrap()
 		);
+	}
+
+	#[cfg(feature = "serialize")]
+	{
+		let res = serde_json::to_string(&markov_chain).unwrap();
+		eprintln!("{}", res);
+		let m: MarkovChain = serde_json::from_str(&res).unwrap();
+
+		println!("{}", m.len());
+		for _ in 0..10 {
+			println!("{}", m.generate_start("among the       ", 25).unwrap());
+		}
 	}
 }

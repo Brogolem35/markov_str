@@ -61,12 +61,20 @@ use lasso::{Capacity, Rodeo, Spur};
 use rand::seq::SliceRandom;
 use regex::Regex;
 
+#[cfg(feature = "serialize")]
+use serde::{Deserialize, Serialize};
+#[cfg(feature = "serialize")]
+use serde_json_any_key::*;
+
 /// Represents a Markov Chain that is designed to generate text.
 ///
 /// [Wikipedia](https://en.wikipedia.org/wiki/Markov_chain)
+#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 pub struct MarkovChain {
+	#[cfg_attr(feature = "serialize", serde(with = "any_key_map"))]
 	items: HashMap<Vec<Spur>, ChainItem>,
 	state_size: usize,
+	#[cfg_attr(feature = "serialize", serde(with = "serde_regex"))]
 	regex: Regex,
 	cache: Rodeo,
 }
@@ -240,6 +248,7 @@ impl MarkovChain {
 }
 
 /// Wrapper for Vec<Spur> to make some operations easier.
+#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 struct ChainItem {
 	items: Vec<Spur>,
 }
