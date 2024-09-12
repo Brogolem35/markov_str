@@ -46,16 +46,20 @@ fn main() {
 	for _ in 0..10 {
 		println!(
 			"ThreadRng: {}",
-			markov_chain.generate_start("among the       ", 25, &mut rand::thread_rng()).unwrap()
+			markov_chain
+				.generate_start("among the       ", 25, &mut rand::thread_rng())
+				.unwrap()
 		);
 	}
-	
+
 	// StdRng with seed
 	let mut rng = rand::rngs::StdRng::seed_from_u64(1337);
 	for _ in 0..10 {
 		println!(
-			"Seeded:{}",
-			markov_chain.generate_start("among the       ", 25, &mut rng).unwrap()
+			"Seeded: {}",
+			markov_chain
+				.generate_start("among the       ", 25, &mut rng)
+				.unwrap()
 		);
 	}
 
@@ -65,9 +69,13 @@ fn main() {
 		eprintln!("{}", res);
 		let m: MarkovChain = serde_json::from_str(&res).unwrap();
 
+		let mut rng = rand::rngs::StdRng::seed_from_u64(1337);
 		println!("{}", m.len());
 		for _ in 0..10 {
-			println!("{}", m.generate_start("among the       ", 25, &mut rng).unwrap());
+			println!(
+				"Deserialized: {}",
+				m.generate_start("among the       ", 25, &mut rng).unwrap()
+			);
 		}
 	}
 }
