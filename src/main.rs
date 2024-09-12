@@ -67,7 +67,7 @@ fn main() {
 
 		println!("{}", m.len());
 		for _ in 0..10 {
-			println!("{}", m.generate_start("among the       ", 25).unwrap());
+			println!("{}", m.generate_start("among the       ", 25, &mut rng).unwrap());
 		}
 	}
 }
