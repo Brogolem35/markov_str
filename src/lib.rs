@@ -248,7 +248,7 @@ impl MarkovChain {
 }
 
 /// Wrapper for Vec<Spur> to make some operations easier.
-#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize), serde(transparent))]
 struct ChainItem {
 	items: Vec<Spur>,
 }
