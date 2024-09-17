@@ -164,7 +164,12 @@ impl MarkovChain {
 	/// Generates text of given length, with accordance to the given starting value.
 	///
 	/// Returns `None` if there is no state.
-	pub fn generate_start(&self, start: &str, n: usize, rng: &mut impl RngCore) -> Option<String> {
+	pub fn generate_start(
+		&self,
+		start: &str,
+		n: usize,
+		rng: &mut impl RngCore,
+	) -> Option<String> {
 		let mut res = String::new();
 
 		let mut prev: Vec<Spur> = self
@@ -249,7 +254,11 @@ impl MarkovChain {
 }
 
 /// Wrapper for Vec<Spur> to make some operations easier.
-#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize), serde(transparent))]
+#[cfg_attr(
+	feature = "serialize",
+	derive(Serialize, Deserialize),
+	serde(transparent)
+)]
 struct ChainItem {
 	items: Vec<Spur>,
 }
