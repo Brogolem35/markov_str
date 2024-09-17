@@ -70,6 +70,7 @@ use {
 /// Represents a Markov Chain that is designed to generate text.
 ///
 /// [Wikipedia](https://en.wikipedia.org/wiki/Markov_chain)
+#[derive(Clone)]
 #[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 pub struct MarkovChain {
 	#[cfg_attr(feature = "serialize", serde(with = "any_key_map"))]
@@ -259,6 +260,7 @@ impl MarkovChain {
 	derive(Serialize, Deserialize),
 	serde(transparent)
 )]
+#[derive(Clone)]
 struct ChainItem {
 	items: Vec<Spur>,
 }
