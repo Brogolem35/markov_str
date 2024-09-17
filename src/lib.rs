@@ -62,9 +62,10 @@ use rand::{seq::SliceRandom, RngCore};
 use regex::Regex;
 
 #[cfg(feature = "serialize")]
-use serde::{Deserialize, Serialize};
-#[cfg(feature = "serialize")]
-use serde_json_any_key::*;
+use {
+	serde::{Deserialize, Serialize},
+	serde_json_any_key::*,
+};
 
 /// Represents a Markov Chain that is designed to generate text.
 ///
