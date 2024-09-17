@@ -76,7 +76,6 @@ fn main() {
 	#[cfg(feature = "serialize")]
 	{
 		let res = serde_json::to_string(&markov_chain).unwrap();
-		eprintln!("{}", res);
 		let m: MarkovChain = serde_json::from_str(&res).unwrap();
 
 		let mut rng = rand::rngs::StdRng::seed_from_u64(1337);
