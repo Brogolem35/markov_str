@@ -25,9 +25,6 @@ serde_json_any_key = {version = "2.0.0", optional = true}
 
 serde_json = "1.0.62"
 
-# [target.'cfg(not(target_env = "msvc"))'.dependencies]
-# tikv-jemallocator = "0.6"
-
 [package.metadata.clippy]
 # This sets all pedantic lints to be treated as errors
 deny = ["clippy::pedantic"]
