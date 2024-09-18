@@ -85,7 +85,7 @@
 //! }
 //! ```
 //!
-//! This example is taken from the `src/main.rs`, you can run it by:
+//! This example is taken from the `examples/main.rs`, you can run it by:
 //! ```ignore
 //! ./get_data.sh
 //! cargo run --release --example=main
