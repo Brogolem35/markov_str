@@ -5,13 +5,6 @@ use regex::Regex;
 use serde_json;
 use std::fs::{self, read_to_string};
 
-// #[cfg(not(target_env = "msvc"))]
-// use tikv_jemallocator::Jemalloc;
-
-// #[cfg(not(target_env = "msvc"))]
-// #[global_allocator]
-// static GLOBAL: Jemalloc = Jemalloc;
-
 fn main() {
 	let training_path = "data";
 
