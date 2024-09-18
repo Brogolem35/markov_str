@@ -154,7 +154,7 @@ impl MarkovChain {
 		self.cache.len()
 	}
 
-	/// Returns if the chain is empty or not.
+	/// Returns whether the chain is empty or not.
 	#[inline]
 	pub fn is_empty(&self) -> bool {
 		self.items.len() == 0
