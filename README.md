@@ -67,6 +67,5 @@ Feel free to open issues and pull requests. If you want to help with what I am c
 
 - Multithreading support
 - Arena for ChainItems
-- Serialization
 - Better code documentation
 - Even better performance
