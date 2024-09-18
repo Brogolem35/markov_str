@@ -62,6 +62,10 @@ cargo run --release --example=main
 
 `./get_data.sh` will download the first 200 books from [Project Gutenberg](https://www.gutenberg.org/), which totals up to more than 100MBs of text.
 
+## Changelog
+
+[Changelog](CHANGELOG.md)
+
 ## License
 
 markov_str is licensed under the MIT license. Feel free to fork and use however you like.
