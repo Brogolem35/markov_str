@@ -7,7 +7,7 @@ description = "Markov Chain implementation optimized for text generation."
 license = "MIT"
 repository = "https://github.com/Brogolem35/markov_str"
 keywords = ["markov", "markov-chain", "text-generation"]
-categories = ["text-processing"]
+categories = ["text-processing", "data-structures"]
 
 [features]
 serialize = ["serde", "serde_regex", "serde_json_any_key", "hashbrown/serde", "lasso/serialize"]
