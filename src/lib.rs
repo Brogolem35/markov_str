@@ -1,5 +1,13 @@
 //! Fast and memory efficient Markov Chain implementation, optimized for text generation
 //!
+//! Features
+//! --------
+//! 
+//! - User can specify what regex they want to use for tokenization.
+//! - MarkovChain::generate and MarkovChain::generate_start functions both take RngCore instead of using rand::thread_rng().
+//! - Strings are interned for faster training and less memory usage.
+//! - Serialized and deserialized with [serde](https://docs.rs/serde/latest/serde/), when `serialize` flag is used.
+//! 
 //! Example
 //! -------
 //!
