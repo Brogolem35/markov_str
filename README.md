@@ -1,5 +1,12 @@
 # markov_str
 
+[![crates.io badge]][crates.io] [![docs badge]][docs]
+
+[crates.io badge]: https://img.shields.io/crates/v/markov_str.svg
+[crates.io]: https://crates.io/crates/markov_str
+[docs badge]: https://docs.rs/markov_str/badge.svg
+[docs]: https://docs.rs/markov_str
+
 markov_str is a fast and memory efficient Markov Chain implementation, optimized for text generation.
 
 ## Features
