@@ -11,7 +11,10 @@ fn seed1() {
 
 	let mut rng = rand::rngs::StdRng::seed_from_u64(1337);
 
-	assert_eq!(chain.generate(10, &mut rng), Some("impossible for a Pokémon to learn two moves at the".to_string()))
+	assert_eq!(
+		chain.generate(10, &mut rng),
+		Some("impossible for a Pokémon to learn two moves at the".to_string())
+	)
 }
 
 #[test]
@@ -29,12 +32,15 @@ fn seed2() {
 fn clone() {
 	let mut chain1 = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
 	chain1.add_text(TEST_TEXT);
-        let chain2 = chain1.clone();
+	let chain2 = chain1.clone();
 
 	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
 	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
 
-	assert_eq!(chain1.generate(10, &mut rng1), chain2.generate(10, &mut rng2))
+	assert_eq!(
+		chain1.generate(10, &mut rng1),
+		chain2.generate(10, &mut rng2)
+	)
 }
 
 #[cfg(feature = "serialize")]
@@ -42,10 +48,13 @@ fn clone() {
 fn serde() {
 	let mut chain1 = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
 	chain1.add_text(TEST_TEXT);
-        let chain2 = chain1.clone();
+	let chain2 = chain1.clone();
 
 	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
 	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
 
-	assert_eq!(chain1.generate(10, &mut rng1), chain2.generate(10, &mut rng2))
+	assert_eq!(
+		chain1.generate(10, &mut rng1),
+		chain2.generate(10, &mut rng2)
+	)
 }
