@@ -10,8 +10,6 @@ use {
 };
 
 /// Represents a Markov Chain that is designed to generate text.
-///
-/// [Wikipedia](https://en.wikipedia.org/wiki/Markov_chain)
 #[derive(Clone)]
 #[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 pub struct MarkovChain {
