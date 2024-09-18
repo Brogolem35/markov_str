@@ -38,7 +38,7 @@ impl MarkovChain {
 	/// Creates an empty MarkovChain with the specified capacity.
 	///
 	/// The hashmap and the cache of the MarkovChain will be able to hold at least `capacity` elements without
-	/// reallocating. If `capacity` is 0, the hash map will not allocate.
+	/// reallocating. If `capacity` is 0, the hashmap will not allocate.
 	pub fn with_capacity(state_size: usize, capacity: usize, regex: Regex) -> MarkovChain {
 		MarkovChain {
 			items: HashMap::with_capacity(capacity),
