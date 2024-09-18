@@ -80,7 +80,7 @@
 //! This example is taken from the `src/main.rs`, you can run it by:
 //! ```ignore
 //! ./get_data.sh
-//! cargo run --release
+//! cargo run --release --example=main
 //! ```
 //!
 //! `./get_data.sh` will download the first 200 books from [Project Gutenberg](https://www.gutenberg.org/), which totals up to more than 100MBs of text.
