@@ -80,11 +80,11 @@ impl MarkovChain {
 	/// First state is choosen randomly.
 	///
 	/// Returns `None` if there is no state.
-	pub fn generate(&self, n: usize, rng: &mut impl RngCore) -> Option<String> {
+	pub fn generate(&self, length: usize, rng: &mut impl RngCore) -> Option<String> {
 		let mut res = String::new();
 
 		let mut prev = Vec::with_capacity(self.state_size);
-		for _ in 0..n {
+		for _ in 0..length {
 			let next_spur = self.next_step(&prev, rng)?;
 			let next = self.cache.resolve(&next_spur);
 
@@ -108,7 +108,7 @@ impl MarkovChain {
 	pub fn generate_start(
 		&self,
 		start: &str,
-		n: usize,
+		length: usize,
 		rng: &mut impl RngCore,
 	) -> Option<String> {
 		let mut res = String::new();
@@ -125,7 +125,7 @@ impl MarkovChain {
 			.filter_map(|t| self.cache.get(t))
 			.collect();
 
-		for _ in 0..n {
+		for _ in 0..length {
 			let next_spur = self.next_step(&prev, rng)?;
 			let next = self.cache.resolve(&next_spur);
 
