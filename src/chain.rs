@@ -194,6 +194,45 @@ impl MarkovChain {
 	}
 }
 
+pub struct Iter<'a> {
+	chain: &'a MarkovChain,
+	count: usize,
+	rng: &'a mut dyn RngCore,
+	prev: Vec<Spur>,
+}
+
+impl MarkovChain {
+	pub fn iter<'a>(&'a self, count: usize, rng: &'a mut dyn RngCore) -> Iter<'a> {
+		Iter {
+			chain: self,
+			count,
+			rng,
+			prev: Vec::with_capacity(self.state_size()),
+		}
+	}
+}
+
+impl<'a> Iterator for Iter<'a> {
+	type Item = String;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		if self.count == 0 {
+			return None;
+		}
+		self.count -= 1;
+
+		let next_spur = self.chain.next_step(&self.prev, &mut self.rng)?;
+		let next = self.chain.cache.resolve(&next_spur);
+
+		if self.prev.len() == self.chain.state_size() {
+			self.prev.remove(0);
+		}
+		self.prev.push(next_spur);
+
+		Some(next.to_string())
+	}
+}
+
 /// Wrapper for Vec<Spur> to make some operations easier.
 #[cfg_attr(
 	feature = "serialize",
