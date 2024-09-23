@@ -56,6 +56,12 @@ fn main() {
 		);
 	}
 
+	// Iter
+	let mut rng = rand::rngs::StdRng::seed_from_u64(1337);
+	for w in markov_chain.iter(25, &mut rng) {
+		println!("Iter: {}", w);
+	}
+
 	// Cloned
 	let mut rng = rand::rngs::StdRng::seed_from_u64(1337);
 	let m: MarkovChain = markov_chain.clone();
