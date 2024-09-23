@@ -91,7 +91,7 @@ impl MarkovChain {
 			res.push_str(next);
 			res.push(' ');
 
-			if prev.len() == self.state_size {
+			if prev.len() == self.state_size() {
 				prev.remove(0);
 			}
 			prev.push(next_spur);
@@ -120,7 +120,7 @@ impl MarkovChain {
 			.collect::<Vec<&str>>()
 			.into_iter()
 			.rev()
-			.take(2)
+			.take(self.state_size())
 			.rev()
 			.filter_map(|t| self.cache.get(t))
 			.collect();
@@ -132,7 +132,7 @@ impl MarkovChain {
 			res.push_str(next);
 			res.push(' ');
 
-			if prev.len() == self.state_size {
+			if prev.len() == self.state_size() {
 				prev.remove(0);
 			}
 			prev.push(next_spur);
