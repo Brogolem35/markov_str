@@ -233,6 +233,62 @@ impl<'a> Iterator for Iter<'a> {
 	}
 }
 
+pub struct IterStart<'a> {
+	chain: &'a MarkovChain,
+	count: usize,
+	rng: &'a mut dyn RngCore,
+	prev: Vec<Spur>,
+}
+
+impl MarkovChain {
+	pub fn iter_start<'a>(
+		&'a self,
+		start: &str,
+		count: usize,
+		rng: &'a mut dyn RngCore,
+	) -> IterStart<'a> {
+		let prev: Vec<Spur> = self
+			.regex
+			.find_iter(start)
+			.map(|m| m.as_str())
+			.collect::<Vec<&str>>()
+			.into_iter()
+			.rev()
+			.take(self.state_size())
+			.rev()
+			.filter_map(|t| self.cache.get(t))
+			.collect();
+
+		IterStart {
+			chain: self,
+			count,
+			rng,
+			prev,
+		}
+	}
+}
+
+impl<'a> Iterator for IterStart<'a> {
+	type Item = String;
+
+	fn next(&mut self) -> Option<Self::Item> {
+		if self.count == 0 {
+			return None;
+		}
+		self.count -= 1;
+
+		let next_spur = self.chain.next_step(&self.prev, &mut self.rng)?;
+		let next = self.chain.cache.resolve(&next_spur);
+
+		if self.prev.len() == self.chain.state_size() {
+			self.prev.remove(0);
+		}
+		self.prev.push(next_spur);
+
+		Some(next.to_string())
+	}
+}
+
 /// Wrapper for Vec<Spur> to make some operations easier.
 #[cfg_attr(
 	feature = "serialize",
