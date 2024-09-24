@@ -169,7 +169,7 @@ impl MarkovChain {
 			.get_rand(rng)
 	}
 
-	/// Does the same thing as [`MarkovChain::generate()`] but instead of returning a String, returns a lazyly evaluated iterator.
+	/// Does the same thing as [`MarkovChain::generate()`] but instead of returning a String, returns a lazily evaluated iterator.
 	pub fn iter<'a>(&'a self, count: usize, rng: &'a mut dyn RngCore) -> MarkovChainIter<'a> {
 		MarkovChainIter {
 			chain: self,
