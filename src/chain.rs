@@ -268,6 +268,3 @@ impl ChainItem {
 		Some(res)
 	}
 }
-
-/// Recommended Regex for general use.
-pub static WORD_REGEX: &str = r"(\p{Alphabetic}|\d)(\p{Alphabetic}|\d|'|-)*(\.|!|\?)?";
