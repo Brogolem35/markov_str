@@ -64,7 +64,7 @@ fn main() {
 
 	// Iter Start
 	let mut rng = rand::rngs::StdRng::seed_from_u64(1337);
-	for w in markov_chain.iter_start("among the       " ,25, &mut rng) {
+	for w in markov_chain.iter_start("among the       ", 25, &mut rng) {
 		println!("Iter Start: {}", w);
 	}
 
