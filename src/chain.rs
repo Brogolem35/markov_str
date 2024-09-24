@@ -50,7 +50,7 @@ impl MarkovChain {
 
 	/// Adds text as training data. The tokens will be created with the regex of the MarkovChain.
 	pub fn add_text(&mut self, text: &str) {
-		let tokens: Vec<_> = self
+		let tokens: Vec<Spur> = self
 			.regex
 			.find_iter(text)
 			.map(|t| self.cache.get_or_intern(t.as_str()))
