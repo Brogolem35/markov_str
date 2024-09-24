@@ -118,6 +118,43 @@ impl MarkovChain {
 		Some(res)
 	}
 
+	/// Does the same thing as [`MarkovChain::generate()`] but instead of returning a String, returns a lazily evaluated iterator.
+	pub fn iter<'a>(&'a self, count: usize, rng: &'a mut dyn RngCore) -> MarkovChainIter<'a> {
+		MarkovChainIter {
+			chain: self,
+			count,
+			rng,
+			prev: Vec::with_capacity(self.state_size()),
+		}
+	}
+
+	/// Does the same thing as [`MarkovChain::generate_start()`] but instead of returning a String, returns a lazily evaluated iterator.
+	pub fn iter_start<'a>(
+		&'a self,
+		start: &str,
+		count: usize,
+		rng: &'a mut dyn RngCore,
+	) -> MarkovChainIter<'a> {
+		let prev: Vec<Spur> = self
+			.regex
+			.find_iter(start)
+			.map(|m| m.as_str())
+			.collect::<Vec<&str>>()
+			.into_iter()
+			.rev()
+			.take(self.state_size())
+			.rev()
+			.filter_map(|t| self.cache.get(t))
+			.collect();
+
+		MarkovChainIter {
+			chain: self,
+			count,
+			rng,
+			prev,
+		}
+	}
+
 	/// Returns the number of states the chain has.
 	#[inline]
 	pub fn len(&self) -> usize {
@@ -167,43 +204,6 @@ impl MarkovChain {
 			.collect::<Vec<&ChainItem>>()
 			.choose(rng)?
 			.get_rand(rng)
-	}
-
-	/// Does the same thing as [`MarkovChain::generate()`] but instead of returning a String, returns a lazily evaluated iterator.
-	pub fn iter<'a>(&'a self, count: usize, rng: &'a mut dyn RngCore) -> MarkovChainIter<'a> {
-		MarkovChainIter {
-			chain: self,
-			count,
-			rng,
-			prev: Vec::with_capacity(self.state_size()),
-		}
-	}
-
-	/// Does the same thing as [`MarkovChain::generate_start()`] but instead of returning a String, returns a lazily evaluated iterator.
-	pub fn iter_start<'a>(
-		&'a self,
-		start: &str,
-		count: usize,
-		rng: &'a mut dyn RngCore,
-	) -> MarkovChainIter<'a> {
-		let prev: Vec<Spur> = self
-			.regex
-			.find_iter(start)
-			.map(|m| m.as_str())
-			.collect::<Vec<&str>>()
-			.into_iter()
-			.rev()
-			.take(self.state_size())
-			.rev()
-			.filter_map(|t| self.cache.get(t))
-			.collect();
-
-		MarkovChainIter {
-			chain: self,
-			count,
-			rng,
-			prev,
-		}
 	}
 }
 
