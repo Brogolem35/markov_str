@@ -5,6 +5,19 @@ use regex::Regex;
 const TEST_TEXT: &str = "Hey guys, did you know that Vaporeon can learn Mist in Yellow, but only under a very specific circumstance? In Yellow, Vaporeon is meant to learn both Haze and Mist at level 42. However, the programming at the time is so bad it's impossible for a Pokémon to learn two moves at the same level. As a result, Vaporeon will only learn Haze and not Mist. Pokémon who leveled up using the Daycare do not have this restriction though. If Vaporeon reaches level 42 while in the Daycare, it will learn both Haze and Mist.";
 
 #[test]
+fn state_size_zero() {
+	let mut chain = MarkovChain::new(0, Regex::new(WORD_REGEX).unwrap());
+	chain.add_text(TEST_TEXT);
+
+	let mut rng = rand::thread_rng();
+
+	assert_eq!(
+		chain.generate(10, &mut rng),
+		None
+	)
+}
+
+#[test]
 fn seed1() {
 	let mut chain = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
 	chain.add_text(TEST_TEXT);
