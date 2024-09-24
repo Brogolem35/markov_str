@@ -110,7 +110,9 @@ fn iter_start1() {
 	for _ in 0..10 {
 		assert_eq!(
 			chain.generate_start("Vaporeon", LEN, &mut rng1).unwrap(),
-			chain.iter_start("Vaporeon", LEN, &mut rng2).collect::<Vec<&str>>().join(" ")
+			chain.iter_start("Vaporeon", LEN, &mut rng2)
+				.collect::<Vec<&str>>()
+				.join(" ")
 		)
 	}
 }
@@ -128,7 +130,9 @@ fn iter_start2() {
 	for _ in 0..10 {
 		assert_eq!(
 			chain.generate_start("Vaporeon", LEN, &mut rng1).unwrap(),
-			chain.iter_start("Vaporeon", LEN, &mut rng2).collect::<Vec<&str>>().join(" ")
+			chain.iter_start("Vaporeon", LEN, &mut rng2)
+				.collect::<Vec<&str>>()
+				.join(" ")
 		)
 	}
 }
@@ -146,7 +150,9 @@ fn iter_start3() {
 	for _ in 0..10 {
 		assert_eq!(
 			chain.generate_start("Vaporeon", LEN, &mut rng1).unwrap(),
-			chain.iter_start("Vaporeon", LEN, &mut rng2).collect::<Vec<&str>>().join(" ")
+			chain.iter_start("Vaporeon", LEN, &mut rng2)
+				.collect::<Vec<&str>>()
+				.join(" ")
 		)
 	}
 }
