@@ -209,7 +209,7 @@ impl MarkovChain {
 		start: &str,
 		count: usize,
 		rng: &'a mut dyn RngCore,
-	) -> MarkovChainIterStart<'a> {
+	) -> MarkovChainIter<'a> {
 		let prev: Vec<Spur> = self
 			.regex
 			.find_iter(start)
@@ -222,7 +222,7 @@ impl MarkovChain {
 			.filter_map(|t| self.cache.get(t))
 			.collect();
 
-		MarkovChainIterStart {
+		MarkovChainIter {
 			chain: self,
 			count,
 			rng,
@@ -239,34 +239,6 @@ pub struct MarkovChainIter<'a> {
 }
 
 impl<'a> Iterator for MarkovChainIter<'a> {
-	type Item = String;
-
-	fn next(&mut self) -> Option<Self::Item> {
-		if self.count == 0 {
-			return None;
-		}
-		self.count -= 1;
-
-		let next_spur = self.chain.next_step(&self.prev, &mut self.rng)?;
-		let next = self.chain.cache.resolve(&next_spur);
-
-		if self.prev.len() == self.chain.state_size() {
-			self.prev.remove(0);
-		}
-		self.prev.push(next_spur);
-
-		Some(next.to_string())
-	}
-}
-
-pub struct MarkovChainIterStart<'a> {
-	chain: &'a MarkovChain,
-	count: usize,
-	rng: &'a mut dyn RngCore,
-	prev: Vec<Spur>,
-}
-
-impl<'a> Iterator for MarkovChainIterStart<'a> {
 	type Item = String;
 
 	fn next(&mut self) -> Option<Self::Item> {
