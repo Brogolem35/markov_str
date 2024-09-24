@@ -207,6 +207,7 @@ impl MarkovChain {
 	}
 }
 
+/// Iterator that iterates over generation steps.
 pub struct MarkovChainIter<'a> {
 	chain: &'a MarkovChain,
 	count: usize,
