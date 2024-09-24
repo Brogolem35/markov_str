@@ -239,7 +239,7 @@ pub struct MarkovChainIter<'a> {
 }
 
 impl<'a> Iterator for MarkovChainIter<'a> {
-	type Item = String;
+	type Item = &'a str;
 
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.count == 0 {
@@ -255,7 +255,7 @@ impl<'a> Iterator for MarkovChainIter<'a> {
 		}
 		self.prev.push(next_spur);
 
-		Some(next.to_string())
+		Some(next)
 	}
 }
 
