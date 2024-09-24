@@ -81,22 +81,15 @@ impl MarkovChain {
 	///
 	/// Returns `None` if there is no state.
 	pub fn generate(&self, length: usize, rng: &mut impl RngCore) -> Option<String> {
-		let mut res = String::new();
-
-		let mut prev = Vec::with_capacity(self.state_size);
-		for _ in 0..length {
-			let next_spur = self.next_step(&prev, rng)?;
-			let next = self.cache.resolve(&next_spur);
-
-			res.push_str(next);
-			res.push(' ');
-
-			if prev.len() == self.state_size() {
-				prev.remove(0);
-			}
-			prev.push(next_spur);
+		if self.len() == 0 {
+			return None;
 		}
 
+		let mut res = String::new();
+		for next in self.iter(length, rng) {
+			res.push_str(next);
+			res.push(' ');
+		}
 		res.pop();
 
 		Some(res)
