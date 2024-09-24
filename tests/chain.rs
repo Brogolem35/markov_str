@@ -43,6 +43,130 @@ fn clone() {
 	)
 }
 
+#[test]
+fn iter1() {
+	const LEN: usize = 10;
+
+	let mut chain = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+	chain.add_text(TEST_TEXT);
+
+	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
+	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
+
+	for _ in 0..10 {
+		assert_eq!(
+			chain.generate(LEN, &mut rng1).unwrap(),
+			chain.iter(LEN, &mut rng2).collect::<Vec<String>>().join(" ")
+		)
+	}
+}
+
+#[test]
+fn iter2() {
+	const LEN: usize = 25;
+
+	let mut chain = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+	chain.add_text(TEST_TEXT);
+
+	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
+	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
+
+	for _ in 0..10 {
+		assert_eq!(
+			chain.generate(LEN, &mut rng1).unwrap(),
+			chain.iter(LEN, &mut rng2).collect::<Vec<String>>().join(" ")
+		)
+	}
+}
+
+#[test]
+fn iter3() {
+	const LEN: usize = 100;
+
+	let mut chain = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+	chain.add_text(TEST_TEXT);
+
+	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
+	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
+
+	for _ in 0..10 {
+		assert_eq!(
+			chain.generate(LEN, &mut rng1).unwrap(),
+			chain.iter(LEN, &mut rng2).collect::<Vec<String>>().join(" ")
+		)
+	}
+}
+
+#[test]
+fn iter_start1() {
+	const LEN: usize = 10;
+
+	let mut chain = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+	chain.add_text(TEST_TEXT);
+
+	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
+	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
+
+	for _ in 0..10 {
+		assert_eq!(
+			chain.generate_start("Vaporeon", LEN, &mut rng1).unwrap(),
+			chain.iter_start("Vaporeon", LEN, &mut rng2).collect::<Vec<String>>().join(" ")
+		)
+	}
+}
+
+#[test]
+fn iter_start2() {
+	const LEN: usize = 25;
+
+	let mut chain = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+	chain.add_text(TEST_TEXT);
+
+	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
+	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
+
+	for _ in 0..10 {
+		assert_eq!(
+			chain.generate_start("Vaporeon", LEN, &mut rng1).unwrap(),
+			chain.iter_start("Vaporeon", LEN, &mut rng2).collect::<Vec<String>>().join(" ")
+		)
+	}
+}
+
+#[test]
+fn iter_start3() {
+	const LEN: usize = 100;
+
+	let mut chain = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+	chain.add_text(TEST_TEXT);
+
+	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
+	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
+
+	for _ in 0..10 {
+		assert_eq!(
+			chain.generate_start("Vaporeon", LEN, &mut rng1).unwrap(),
+			chain.iter_start("Vaporeon", LEN, &mut rng2).collect::<Vec<String>>().join(" ")
+		)
+	}
+}
+
+#[test]
+fn iter_start() {
+	let mut chain = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+	chain.add_text(TEST_TEXT);
+
+	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
+	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
+
+	for _ in 0..10 {
+		assert_eq!(
+			chain.generate(10, &mut rng1).unwrap(),
+			chain.iter(10, &mut rng2).collect::<Vec<String>>().join(" ")
+		)
+	}
+}
+
 #[cfg(feature = "serialize")]
 #[test]
 fn serde() {
