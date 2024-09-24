@@ -104,31 +104,14 @@ impl MarkovChain {
 		length: usize,
 		rng: &mut impl RngCore,
 	) -> Option<String> {
+		if self.len() == 0 {
+			return None;
+		}
+
 		let mut res = String::new();
-
-		let mut prev: Vec<Spur> = self
-			.regex
-			.find_iter(start)
-			.map(|m| m.as_str())
-			.collect::<Vec<&str>>()
-			.into_iter()
-			.rev()
-			.take(self.state_size())
-			.rev()
-			.filter_map(|t| self.cache.get(t))
-			.collect();
-
-		for _ in 0..length {
-			let next_spur = self.next_step(&prev, rng)?;
-			let next = self.cache.resolve(&next_spur);
-
+		for next in self.iter_start(start, length, rng) {
 			res.push_str(next);
 			res.push(' ');
-
-			if prev.len() == self.state_size() {
-				prev.remove(0);
-			}
-			prev.push(next_spur);
 		}
 		res.pop();
 
