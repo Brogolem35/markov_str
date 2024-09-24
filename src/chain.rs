@@ -192,16 +192,8 @@ impl MarkovChain {
 			.choose(rng)?
 			.get_rand(rng)
 	}
-}
 
-pub struct MarkovChainIter<'a> {
-	chain: &'a MarkovChain,
-	count: usize,
-	rng: &'a mut dyn RngCore,
-	prev: Vec<Spur>,
-}
-
-impl MarkovChain {
+	/// Does the same thing as [`MarkovChain::generate()`] but instead of returning a String, returns a lazyly evaluated iterator.
 	pub fn iter<'a>(&'a self, count: usize, rng: &'a mut dyn RngCore) -> MarkovChainIter<'a> {
 		MarkovChainIter {
 			chain: self,
@@ -210,6 +202,40 @@ impl MarkovChain {
 			prev: Vec::with_capacity(self.state_size()),
 		}
 	}
+
+	/// Does the same thing as [`MarkovChain::generate_start()`] but instead of returning a String, returns a lazyly evaluated iterator.
+	pub fn iter_start<'a>(
+		&'a self,
+		start: &str,
+		count: usize,
+		rng: &'a mut dyn RngCore,
+	) -> MarkovChainIterStart<'a> {
+		let prev: Vec<Spur> = self
+			.regex
+			.find_iter(start)
+			.map(|m| m.as_str())
+			.collect::<Vec<&str>>()
+			.into_iter()
+			.rev()
+			.take(self.state_size())
+			.rev()
+			.filter_map(|t| self.cache.get(t))
+			.collect();
+
+		MarkovChainIterStart {
+			chain: self,
+			count,
+			rng,
+			prev,
+		}
+	}
+}
+
+pub struct MarkovChainIter<'a> {
+	chain: &'a MarkovChain,
+	count: usize,
+	rng: &'a mut dyn RngCore,
+	prev: Vec<Spur>,
 }
 
 impl<'a> Iterator for MarkovChainIter<'a> {
@@ -233,42 +259,14 @@ impl<'a> Iterator for MarkovChainIter<'a> {
 	}
 }
 
-pub struct MarkovChainIIterStart<'a> {
+pub struct MarkovChainIterStart<'a> {
 	chain: &'a MarkovChain,
 	count: usize,
 	rng: &'a mut dyn RngCore,
 	prev: Vec<Spur>,
 }
 
-impl MarkovChain {
-	pub fn iter_start<'a>(
-		&'a self,
-		start: &str,
-		count: usize,
-		rng: &'a mut dyn RngCore,
-	) -> MarkovChainIIterStart<'a> {
-		let prev: Vec<Spur> = self
-			.regex
-			.find_iter(start)
-			.map(|m| m.as_str())
-			.collect::<Vec<&str>>()
-			.into_iter()
-			.rev()
-			.take(self.state_size())
-			.rev()
-			.filter_map(|t| self.cache.get(t))
-			.collect();
-
-		MarkovChainIIterStart {
-			chain: self,
-			count,
-			rng,
-			prev,
-		}
-	}
-}
-
-impl<'a> Iterator for MarkovChainIIterStart<'a> {
+impl<'a> Iterator for MarkovChainIterStart<'a> {
 	type Item = String;
 
 	fn next(&mut self) -> Option<Self::Item> {
