@@ -179,7 +179,7 @@ impl MarkovChain {
 		}
 	}
 
-	/// Does the same thing as [`MarkovChain::generate_start()`] but instead of returning a String, returns a lazyly evaluated iterator.
+	/// Does the same thing as [`MarkovChain::generate_start()`] but instead of returning a String, returns a lazily evaluated iterator.
 	pub fn iter_start<'a>(
 		&'a self,
 		start: &str,
