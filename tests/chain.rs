@@ -18,6 +18,45 @@ fn state_size_zero() {
 }
 
 #[test]
+fn empty_str() {
+	let mut chain = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+	chain.add_text("");
+
+	let mut rng = rand::thread_rng();
+
+	assert_eq!(
+		chain.generate(10, &mut rng),
+		None
+	)
+}
+
+#[test]
+fn zero_state_empty_str() {
+	let mut chain = MarkovChain::new(0, Regex::new(WORD_REGEX).unwrap());
+	chain.add_text("");
+
+	let mut rng = rand::thread_rng();
+
+	assert_eq!(
+		chain.generate(10, &mut rng),
+		None
+	)
+}
+
+#[test]
+fn short_str() {
+	let mut chain = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+	chain.add_text("aaa");
+
+	let mut rng = rand::thread_rng();
+
+	assert_eq!(
+		chain.generate(10, &mut rng),
+		None
+	)
+}
+
+#[test]
 fn seed1() {
 	let mut chain = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
 	chain.add_text(TEST_TEXT);
