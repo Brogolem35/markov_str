@@ -57,6 +57,11 @@ impl MarkovChain {
 			.map(|t| self.cache.get_or_intern(t.as_str()))
 			.collect();
 
+		// vec.windows(0) panics for some reason.
+		if tokens.len() < 1 {
+			return;
+		}
+
 		// Creating a preallocated buffer and filling and cleaning it instead of creating a new one every loop is way more efficient.
 		let mut prevbuf: SmallVec<[Spur;4]> = SmallVec::with_capacity(self.state_size);
 		for win in tokens.windows(tokens.len().min(self.state_size + 1)) {
