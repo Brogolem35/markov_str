@@ -58,7 +58,7 @@ impl MarkovChain {
 			.collect();
 
 		// vec.windows(0) panics for some reason.
-		if tokens.len() < 1 {
+		if tokens.is_empty() {
 			return;
 		}
 
@@ -90,7 +90,7 @@ impl MarkovChain {
 	///
 	/// Returns `None` if there is no state.
 	pub fn generate(&self, length: usize, rng: &mut impl RngCore) -> Option<String> {
-		if self.len() == 0 {
+		if self.is_empty() {
 			return None;
 		}
 
@@ -113,7 +113,7 @@ impl MarkovChain {
 		length: usize,
 		rng: &mut impl RngCore,
 	) -> Option<String> {
-		if self.len() == 0 {
+		if self.is_empty() {
 			return None;
 		}
 
