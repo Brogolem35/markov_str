@@ -15,7 +15,7 @@ use {
 #[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 pub struct MarkovChain {
 	#[cfg_attr(feature = "serialize", serde(with = "any_key_map"))]
-	items: HashMap<SmallVec<[Spur;4]>, ChainItem>,
+	items: HashMap<SmallVec<[Spur; 4]>, ChainItem>,
 	state_size: usize,
 	#[cfg_attr(feature = "serialize", serde(with = "serde_regex"))]
 	regex: Regex,
@@ -63,7 +63,7 @@ impl MarkovChain {
 		}
 
 		// Creating a preallocated buffer and filling and cleaning it instead of creating a new one every loop is way more efficient.
-		let mut prevbuf: SmallVec<[Spur;4]> = SmallVec::with_capacity(self.state_size);
+		let mut prevbuf: SmallVec<[Spur; 4]> = SmallVec::with_capacity(self.state_size);
 		for win in tokens.windows(tokens.len().min(self.state_size + 1)) {
 			let rel = win.last().unwrap();
 
