@@ -1,4 +1,4 @@
-use hashbrown::HashMap;
+use hashbrown::{hash_map::RawEntryMut, HashMap};
 use lasso::{Capacity, Rodeo, Spur};
 use rand::{seq::SliceRandom, RngCore};
 use regex::Regex;
@@ -73,10 +73,13 @@ impl MarkovChain {
 					prevbuf.push(*t);
 				}
 
-				if let Some(ci) = self.items.get_mut(&prevbuf) {
-					ci.add(*rel);
-				} else {
-					self.items.insert(prevbuf.clone(), ChainItem::new(*rel));
+				match self.items.raw_entry_mut().from_key(&prevbuf) {
+					RawEntryMut::Occupied(mut view) => {
+						view.get_mut().add(*rel);
+					}
+					RawEntryMut::Vacant(view) => {
+						view.insert(prevbuf.clone(), ChainItem::new(*rel));
+					}
 				}
 			}
 		}
