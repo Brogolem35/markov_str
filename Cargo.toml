@@ -13,7 +13,7 @@ categories = ["text-processing", "data-structures"]
 serialize = ["serde", "serde_regex", "serde_json_any_key", "hashbrown/serde", "lasso/serialize", "smallvec/serde"]
 
 [dependencies]
-hashbrown = "0.14.5"
+hashbrown = "0.15.0"
 lasso = {version = "0.7.3", features = ["ahasher", "inline-more"]}
 rand = "0.8.5"
 regex = "1.11.0"
