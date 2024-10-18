@@ -68,16 +68,6 @@ fn main() {
 		println!("Iter Start: {}", w);
 	}
 
-	// Cloned
-	let mut rng = rand::rngs::StdRng::seed_from_u64(1337);
-	let m: MarkovChain = markov_chain.clone();
-	for _ in 0..10 {
-		println!(
-			"Cloned: {}",
-			m.generate_start("among the       ", 25, &mut rng).unwrap()
-		);
-	}
-
 	#[cfg(feature = "serialize")]
 	{
 		let res = serde_json::to_string(&markov_chain).unwrap();
