@@ -11,10 +11,7 @@ fn state_size_zero() {
 
 	let mut rng = rand::thread_rng();
 
-	assert_eq!(
-		chain.generate(10, &mut rng),
-		None
-	)
+	assert_eq!(chain.generate(10, &mut rng), None)
 }
 
 #[test]
@@ -24,10 +21,7 @@ fn empty_str() {
 
 	let mut rng = rand::thread_rng();
 
-	assert_eq!(
-		chain.generate(10, &mut rng),
-		None
-	)
+	assert_eq!(chain.generate(10, &mut rng), None)
 }
 
 #[test]
@@ -37,10 +31,7 @@ fn zero_state_empty_str() {
 
 	let mut rng = rand::thread_rng();
 
-	assert_eq!(
-		chain.generate(10, &mut rng),
-		None
-	)
+	assert_eq!(chain.generate(10, &mut rng), None)
 }
 
 #[test]
@@ -50,10 +41,7 @@ fn short_str() {
 
 	let mut rng = rand::thread_rng();
 
-	assert_eq!(
-		chain.generate(10, &mut rng),
-		None
-	)
+	assert_eq!(chain.generate(10, &mut rng), None)
 }
 
 #[test]
