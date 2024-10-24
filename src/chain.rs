@@ -62,24 +62,24 @@ impl MarkovChain {
 			return;
 		}
 
-		// Creating a preallocated buffer and filling and cleaning it instead of creating a new one every loop is way more efficient.
-		let mut prevbuf: SmallVec<[Spur; 4]> = SmallVec::with_capacity(self.state_size);
 		for win in tokens.windows(tokens.len().min(self.state_size + 1)) {
+			let wlen = win.len();
 			let rel = win.last().unwrap();
 
-			for i in 1..win.len() {
-				prevbuf.clear();
-				for t in win.iter().rev().skip(1).take(i).rev() {
-					prevbuf.push(*t);
-				}
-
-				// as_slice() performs better than &prevbuf
-				match self.items.raw_entry_mut().from_key(prevbuf.as_slice()) {
+			// if wlen is less than 2, there is nothing to do
+			for i in 2..=wlen {
+				// win[(wlen - 1)] == rel == win.last()
+				// this is equal to win.iter().rev().skip(1).take(i - 1).rev()
+				let slice = &win[(wlen - i)..(wlen - 1)];
+				match self.items.raw_entry_mut().from_key(slice) {
 					RawEntryMut::Occupied(mut view) => {
 						view.get_mut().add(*rel);
 					}
 					RawEntryMut::Vacant(view) => {
-						view.insert(prevbuf.clone(), ChainItem::new(*rel));
+						view.insert(
+							SmallVec::from_slice(slice),
+							ChainItem::new(*rel),
+						);
 					}
 				}
 			}
