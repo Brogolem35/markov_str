@@ -73,7 +73,8 @@ impl MarkovChain {
 					prevbuf.push(*t);
 				}
 
-				match self.items.raw_entry_mut().from_key(&prevbuf) {
+				// as_slice() performs better than &prevbuf
+				match self.items.raw_entry_mut().from_key(prevbuf.as_slice()) {
 					RawEntryMut::Occupied(mut view) => {
 						view.get_mut().add(*rel);
 					}
