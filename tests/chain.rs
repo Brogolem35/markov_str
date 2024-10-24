@@ -35,6 +35,17 @@ fn zero_state_empty_str() {
 }
 
 #[test]
+fn len() {
+	let mut chain = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+	chain.add_text(TEST_TEXT);
+
+	assert_eq!(
+		chain.len(),
+		148
+	)
+}
+
+#[test]
 fn short_str() {
 	let mut chain = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
 	chain.add_text("aaa");
