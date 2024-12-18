@@ -10,11 +10,11 @@ keywords = ["markov", "markov-chain", "text-generation"]
 categories = ["text-processing", "data-structures"]
 
 [features]
-serialize = ["serde", "serde_regex", "serde_json_any_key", "hashbrown/serde", "lasso/serialize", "smallvec/serde", "twox-hash/serialize"]
+serialize = ["serde", "serde_regex", "serde_json_any_key", "hashbrown/serde", "lasso/serialize", "smallvec/serde"]
 
 [dependencies]
 hashbrown = "0.15.0"
-twox-hash = "2.1.0"
+foldhash = "0.1.3"
 lasso = {version = "0.7.3", features = ["ahasher", "inline-more"]}
 rand = "0.8.5"
 regex = "1.11.1"
