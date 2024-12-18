@@ -15,7 +15,7 @@ use {
 #[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 pub struct MarkovChain {
 	#[cfg_attr(feature = "serialize", serde(with = "any_key_map"))]
-	items: HashMap<SmallVec<[Spur; 4]>, ChainItem>,
+	items: HashMap<SmallVec<[Spur; 4]>, ChainItem, foldhash::fast::FixedState>,
 	state_size: usize,
 	#[cfg_attr(feature = "serialize", serde(with = "serde_regex"))]
 	regex: Regex,
@@ -29,7 +29,7 @@ impl MarkovChain {
 	/// It will not allocate until the first insertion.
 	pub fn new(state_size: usize, regex: Regex) -> MarkovChain {
 		MarkovChain {
-			items: HashMap::new(),
+			items: HashMap::with_hasher(foldhash::fast::FixedState::default()),
 			state_size,
 			regex,
 			cache: Rodeo::new(),
@@ -42,7 +42,10 @@ impl MarkovChain {
 	/// reallocating. If `capacity` is 0, the hashmap will not allocate.
 	pub fn with_capacity(state_size: usize, capacity: usize, regex: Regex) -> MarkovChain {
 		MarkovChain {
-			items: HashMap::with_capacity(capacity),
+			items: HashMap::with_capacity_and_hasher(
+				capacity,
+				foldhash::fast::FixedState::default(),
+			),
 			state_size,
 			regex,
 			cache: Rodeo::with_capacity(Capacity::for_strings(capacity)),
