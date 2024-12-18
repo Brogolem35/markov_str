@@ -14,6 +14,7 @@ serialize = ["serde", "serde_regex", "serde_json_any_key", "hashbrown/serde", "l
 
 [dependencies]
 hashbrown = "0.15.0"
+twox-hash = "2.1.0"
 lasso = {version = "0.7.3", features = ["ahasher", "inline-more"]}
 rand = "0.8.5"
 regex = "1.11.1"
