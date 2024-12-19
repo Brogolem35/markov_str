@@ -89,6 +89,51 @@ impl MarkovChain {
 		}
 	}
 
+	/// Adds text as training data with a weight. The tokens will be created with the regex of the MarkovChain.
+	///
+	/// It is mostly equivalent to calling [`MarkovChain::add_text()`] `weight` number of times, but
+	/// may not yield the same results when [`MarkovChain::generate()`] is called with same RNG,
+	/// due to internal workings.
+	pub fn add_text_weighted(&mut self, text: &str, weight: usize) {
+		if weight == 0 {
+			return;
+		}
+
+		let tokens: Vec<Spur> = self
+			.regex
+			.find_iter(text)
+			.map(|t| self.cache.get_or_intern(t.as_str()))
+			.collect();
+
+		// vec.windows(0) panics for some reason.
+		if tokens.is_empty() {
+			return;
+		}
+
+		for win in tokens.windows(tokens.len().min(self.state_size + 1)) {
+			let wlen = win.len();
+			let rel = win.last().unwrap();
+
+			// if wlen is less than 2, there is nothing to do
+			for i in 2..=wlen {
+				// win[(wlen - 1)] == rel == win.last()
+				// this is equal to win.iter().rev().skip(1).take(i - 1).rev()
+				let slice = &win[(wlen - i)..(wlen - 1)];
+				match self.items.raw_entry_mut().from_key(slice) {
+					RawEntryMut::Occupied(mut view) => {
+						view.get_mut().add_weighted(*rel, weight);
+					}
+					RawEntryMut::Vacant(view) => {
+						view.insert(
+							SmallVec::from_slice(slice),
+							ChainItem::new_weighted(*rel, weight),
+						);
+					}
+				}
+			}
+		}
+	}
+
 	/// Generates text of given length.
 	/// First state is choosen randomly.
 	///
@@ -266,9 +311,21 @@ impl ChainItem {
 		ChainItem { items: vec![s] }
 	}
 
+	/// Creates a ChainItem, which will also contain `s` `weight` number of times.
+	fn new_weighted(s: Spur, weight: usize) -> ChainItem {
+		ChainItem {
+			items: vec![s; weight],
+		}
+	}
+
 	/// Adds item.
 	fn add(&mut self, s: Spur) {
 		self.items.push(s);
+	}
+
+	/// Adds item `weight` number of times.
+	fn add_weighted(&mut self, s: Spur, weight: usize) {
+		self.items.extend(std::iter::repeat(s).take(weight));
 	}
 
 	/// Gets a random item.
