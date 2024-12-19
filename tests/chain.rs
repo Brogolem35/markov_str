@@ -112,6 +112,37 @@ fn seed2() {
 }
 
 #[test]
+fn seed3() {
+	for i in 1..=10 {
+		let mut chain1 = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+		for _ in 0..i {
+			chain1.add_text(TEST_TEXT);
+		}
+		let mut chain2 = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+		for _ in 0..i {
+			chain2.add_text(TEST_TEXT);
+		}
+
+		let seed = thread_rng().gen();
+		let mut rng1 = rand::rngs::StdRng::seed_from_u64(seed);
+		let mut rng2 = rand::rngs::StdRng::seed_from_u64(seed);
+
+		assert_eq!(
+			chain1.generate(10, &mut rng1),
+			chain2.generate(10, &mut rng2)
+		);
+		assert_eq!(
+			chain1.generate(10, &mut rng1),
+			chain2.generate(10, &mut rng2)
+		);
+		assert_eq!(
+			chain1.generate(10, &mut rng1),
+			chain2.generate(10, &mut rng2)
+		);
+	}
+}
+
+#[test]
 fn clone() {
 	let mut chain1 = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
 	chain1.add_text(TEST_TEXT);
