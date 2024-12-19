@@ -143,6 +143,34 @@ fn seed3() {
 }
 
 #[test]
+fn weight() {
+	for i in 0..=10 {
+		let mut chain1 = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+		chain1.add_text_weighted(TEST_TEXT, i);
+
+		let mut chain2 = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
+		chain2.add_text_weighted(TEST_TEXT, i);
+
+		let seed = thread_rng().gen();
+		let mut rng1 = rand::rngs::StdRng::seed_from_u64(seed);
+		let mut rng2 = rand::rngs::StdRng::seed_from_u64(seed);
+
+		assert_eq!(
+			chain1.generate(10, &mut rng1),
+			chain2.generate(10, &mut rng2)
+		);
+		assert_eq!(
+			chain1.generate(10, &mut rng1),
+			chain2.generate(10, &mut rng2)
+		);
+		assert_eq!(
+			chain1.generate(10, &mut rng1),
+			chain2.generate(10, &mut rng2)
+		);
+	}
+}
+
+#[test]
 fn clone() {
 	let mut chain1 = MarkovChain::new(2, Regex::new(WORD_REGEX).unwrap());
 	chain1.add_text(TEST_TEXT);
