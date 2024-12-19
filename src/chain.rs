@@ -27,6 +27,7 @@ impl MarkovChain {
 	///
 	/// The hashmap and the cache of the MarkovChain is initially created with the capacity of 0.
 	/// It will not allocate until the first insertion.
+	#[inline]
 	pub fn new(state_size: usize, regex: Regex) -> MarkovChain {
 		MarkovChain {
 			items: HashMap::with_hasher(foldhash::fast::FixedState::default()),
@@ -40,6 +41,7 @@ impl MarkovChain {
 	///
 	/// The hashmap and the cache of the MarkovChain will be able to hold at least `capacity` elements without
 	/// reallocating. If `capacity` is 0, the hashmap will not allocate.
+	#[inline]
 	pub fn with_capacity(state_size: usize, capacity: usize, regex: Regex) -> MarkovChain {
 		MarkovChain {
 			items: HashMap::with_capacity_and_hasher(
@@ -177,6 +179,7 @@ impl MarkovChain {
 	}
 
 	/// Does the same thing as [`MarkovChain::generate()`] but instead of returning a String, returns a lazily evaluated iterator.
+	#[inline]
 	pub fn iter<'a>(&'a self, count: usize, rng: &'a mut dyn RngCore) -> MarkovChainIter<'a> {
 		MarkovChainIter {
 			chain: self,
@@ -187,6 +190,7 @@ impl MarkovChain {
 	}
 
 	/// Does the same thing as [`MarkovChain::generate_start()`] but instead of returning a String, returns a lazily evaluated iterator.
+	#[inline]
 	pub fn iter_start<'a>(
 		&'a self,
 		start: &str,
@@ -307,11 +311,13 @@ struct ChainItem {
 
 impl ChainItem {
 	/// Creates a ChainItem, which will also contain `s`.
+	#[inline]
 	fn new(s: Spur) -> ChainItem {
 		ChainItem { items: vec![s] }
 	}
 
 	/// Creates a ChainItem, which will also contain `s` `weight` number of times.
+	#[inline]
 	fn new_weighted(s: Spur, weight: usize) -> ChainItem {
 		ChainItem {
 			items: vec![s; weight],
@@ -319,16 +325,19 @@ impl ChainItem {
 	}
 
 	/// Adds item.
+	#[inline]
 	fn add(&mut self, s: Spur) {
 		self.items.push(s);
 	}
 
 	/// Adds item `weight` number of times.
+	#[inline]
 	fn add_weighted(&mut self, s: Spur, weight: usize) {
 		self.items.extend(std::iter::repeat(s).take(weight));
 	}
 
 	/// Gets a random item.
+	#[inline]
 	fn get_rand(&self, rng: &mut impl RngCore) -> Option<Spur> {
 		let res = *self
 			.items
