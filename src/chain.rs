@@ -13,23 +13,24 @@ use {
 /// Represents a Markov Chain that is designed to generate text.
 #[derive(Clone)]
 #[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
-pub struct MarkovChain {
+pub struct RawMarkovChain<const N: usize> {
 	#[cfg_attr(feature = "serialize", serde(with = "any_key_map"))]
-	items: HashMap<SmallVec<[Spur; 4]>, ChainItem, foldhash::fast::FixedState>,
+	items: HashMap<SmallVec<[Spur; N]>, ChainItem, foldhash::fast::FixedState>,
 	state_size: usize,
 	#[cfg_attr(feature = "serialize", serde(with = "serde_regex"))]
 	regex: Regex,
 	cache: Rodeo,
 }
+pub type MarkovChain = RawMarkovChain<4>;
 
-impl MarkovChain {
+impl<const N: usize> RawMarkovChain<N> {
 	/// Creates an empty MarkovChain.
 	///
 	/// The hashmap and the cache of the MarkovChain is initially created with the capacity of 0.
 	/// It will not allocate until the first insertion.
 	#[inline]
-	pub fn new(state_size: usize, regex: Regex) -> MarkovChain {
-		MarkovChain {
+	pub fn new(state_size: usize, regex: Regex) -> RawMarkovChain<N> {
+		RawMarkovChain {
 			items: HashMap::with_hasher(foldhash::fast::FixedState::default()),
 			state_size,
 			regex,
@@ -42,8 +43,12 @@ impl MarkovChain {
 	/// The hashmap and the cache of the MarkovChain will be able to hold at least `capacity` elements without
 	/// reallocating. If `capacity` is 0, the hashmap will not allocate.
 	#[inline]
-	pub fn with_capacity(state_size: usize, capacity: usize, regex: Regex) -> MarkovChain {
-		MarkovChain {
+	pub fn with_capacity(
+		state_size: usize,
+		capacity: usize,
+		regex: Regex,
+	) -> RawMarkovChain<N> {
+		RawMarkovChain {
 			items: HashMap::with_capacity_and_hasher(
 				capacity,
 				foldhash::fast::FixedState::default(),
@@ -178,45 +183,6 @@ impl MarkovChain {
 		Some(res)
 	}
 
-	/// Does the same thing as [`MarkovChain::generate()`] but instead of returning a String, returns a lazily evaluated iterator.
-	#[inline]
-	pub fn iter<'a>(&'a self, count: usize, rng: &'a mut dyn RngCore) -> MarkovChainIter<'a> {
-		MarkovChainIter {
-			chain: self,
-			count,
-			rng,
-			prev: Vec::with_capacity(self.state_size()),
-		}
-	}
-
-	/// Does the same thing as [`MarkovChain::generate_start()`] but instead of returning a String, returns a lazily evaluated iterator.
-	#[inline]
-	pub fn iter_start<'a>(
-		&'a self,
-		start: &str,
-		count: usize,
-		rng: &'a mut dyn RngCore,
-	) -> MarkovChainIter<'a> {
-		let prev: Vec<Spur> = self
-			.regex
-			.find_iter(start)
-			.map(|m| m.as_str())
-			.collect::<Vec<&str>>()
-			.into_iter()
-			.rev()
-			.take(self.state_size())
-			.rev()
-			.filter_map(|t| self.cache.get(t))
-			.collect();
-
-		MarkovChainIter {
-			chain: self,
-			count,
-			rng,
-			prev,
-		}
-	}
-
 	/// Returns the number of states the chain has.
 	#[inline]
 	pub fn len(&self) -> usize {
@@ -247,6 +213,49 @@ impl MarkovChain {
 		self.regex.clone()
 	}
 
+	/// Does the same thing as [`MarkovChain::generate()`] but instead of returning a String, returns a lazily evaluated iterator.
+	#[inline]
+	pub fn iter<'a>(
+		&'a self,
+		count: usize,
+		rng: &'a mut dyn RngCore,
+	) -> MarkovChainIter<'a, N> {
+		MarkovChainIter {
+			chain: self,
+			count,
+			rng,
+			prev: Vec::with_capacity(self.state_size),
+		}
+	}
+
+	/// Does the same thing as [`MarkovChain::generate_start()`] but instead of returning a String, returns a lazily evaluated iterator.
+	#[inline]
+	pub fn iter_start<'a>(
+		&'a self,
+		start: &str,
+		count: usize,
+		rng: &'a mut dyn RngCore,
+	) -> MarkovChainIter<'a, N> {
+		let prev: Vec<Spur> = self
+			.regex
+			.find_iter(start)
+			.map(|m| m.as_str())
+			.collect::<Vec<&str>>()
+			.into_iter()
+			.rev()
+			.take(self.state_size)
+			.rev()
+			.filter_map(|t| self.cache.get(t))
+			.collect();
+
+		MarkovChainIter {
+			chain: self,
+			count,
+			rng,
+			prev,
+		}
+	}
+
 	/// Returns the appropriate next step for the given previous state.
 	///
 	/// Returns `None` if there is no state.
@@ -270,14 +279,14 @@ impl MarkovChain {
 }
 
 /// Iterator that iterates over generation steps.
-pub struct MarkovChainIter<'a> {
-	chain: &'a MarkovChain,
+pub struct MarkovChainIter<'a, const N: usize> {
+	chain: &'a RawMarkovChain<N>,
 	count: usize,
 	rng: &'a mut dyn RngCore,
 	prev: Vec<Spur>,
 }
 
-impl<'a> Iterator for MarkovChainIter<'a> {
+impl<'a, const N: usize> Iterator for MarkovChainIter<'a, N> {
 	type Item = &'a str;
 
 	fn next(&mut self) -> Option<Self::Item> {
@@ -289,7 +298,7 @@ impl<'a> Iterator for MarkovChainIter<'a> {
 		let next_spur = self.chain.next_step(&self.prev, &mut self.rng)?;
 		let next = self.chain.cache.resolve(&next_spur);
 
-		if self.prev.len() == self.chain.state_size() {
+		if self.prev.len() == self.chain.state_size {
 			self.prev.remove(0);
 		}
 		self.prev.push(next_spur);
