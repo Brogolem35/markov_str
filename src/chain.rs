@@ -11,6 +11,9 @@ use {
 };
 
 /// Represents a Markov Chain that is designed to generate text.
+/// 
+/// States with sizes that are lesser than or equal to `N` are stored inline, thus are more performant.
+/// Those of sizes that are greater are stored in a seperate [`Vec`].
 #[derive(Clone)]
 #[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 pub struct RawMarkovChain<const N: usize> {
@@ -21,6 +24,10 @@ pub struct RawMarkovChain<const N: usize> {
 	regex: Regex,
 	cache: Rodeo,
 }
+
+/// Represents a Markov Chain that is designed to generate text.
+/// 
+/// Is a type alias for [`RawMarkovChain<4>`].
 pub type MarkovChain = RawMarkovChain<4>;
 
 impl<const N: usize> RawMarkovChain<N> {
