@@ -14,8 +14,8 @@ use {
 ///
 /// States with sizes that are lesser than or equal to `N` are stored inline, thus are more performant.
 /// Those of sizes that are greater are stored in a seperate [`Vec`].
-#[derive(Clone)]
 #[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
+#[derive(Clone)]
 pub struct RawMarkovChain<const N: usize> {
 	#[cfg_attr(feature = "serialize", serde(with = "any_key_map"))]
 	items: HashMap<SmallVec<[Spur; N]>, ChainItem, foldhash::fast::FixedState>,
