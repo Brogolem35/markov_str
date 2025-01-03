@@ -1,6 +1,6 @@
 [package]
 name = "markov_str"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["brogolem35"]
 edition = "2021"
 description = "Markov Chain implementation optimized for text generation."
