@@ -6,6 +6,7 @@
 - New `RawMarkovChain::iter*` methods.
 - New `RawMarkovChain::add_text_weighted` method.
 - More efficient memory use for states where sizes of the states are lesser than or equal to N, where `RawMarkovChain<N>`.
+- Changed license to MPL-2.0.
 
 ## 0.2.0
 
