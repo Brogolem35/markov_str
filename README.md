@@ -68,7 +68,8 @@ cargo run --release --example=main
 
 ## License
 
-markov_str is licensed under the MIT license. Feel free to fork and use however you like.
+markov_str is licensed under the MPL-2.0 license. You can use it in both open-source software of different licenses and proprietary software as long as
+changes to the original code is shared under the same license.
 
 ## Contributing
 
