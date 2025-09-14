@@ -39,7 +39,7 @@
 //! let markov_chain = contents.fold(
 //!     MarkovChain::with_capacity(2, 8_000_000),
 //!     |mut a, s| {
-//!         a.add_text(regex.find_iter(&s).map(|x| x.as_str()));
+//!         a.add_tokens(regex.find_iter(&s).map(|x| x.as_str()));
 //!         a
 //!     },
 //! );

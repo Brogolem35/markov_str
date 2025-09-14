@@ -60,7 +60,7 @@ impl<const N: usize> RawMarkovChain<N> {
 	}
 
 	/// Adds text as training data. The tokens will be created with the regex of the MarkovChain.
-	pub fn add_text<T>(&mut self, tokens: T)
+	pub fn add_tokens<T>(&mut self, tokens: T)
 	where
 		T: IntoIterator<Item: AsRef<str>>,
 	{
@@ -100,7 +100,7 @@ impl<const N: usize> RawMarkovChain<N> {
 	/// It is mostly equivalent to calling [`MarkovChain::add_text()`] `weight` number of times, but
 	/// may not yield the same results when [`MarkovChain::generate()`] is called with same RNG,
 	/// due to internal workings.
-	pub fn add_text_weighted<T>(&mut self, tokens: T, weight: usize)
+	pub fn add_tokens_weighted<T>(&mut self, tokens: T, weight: usize)
 	where
 		T: IntoIterator<Item: AsRef<str>>,
 	{

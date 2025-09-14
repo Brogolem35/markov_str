@@ -7,7 +7,7 @@ const TEST_TEXT: &str = "Hey guys, did you know that Vaporeon can learn Mist in 
 #[test]
 fn state_size_zero() {
 	let mut chain = MarkovChain::new(0);
-	chain.add_text(word_regex_matches(TEST_TEXT));
+	chain.add_tokens(word_regex_matches(TEST_TEXT));
 
 	let mut rng = rand::thread_rng();
 
@@ -17,7 +17,7 @@ fn state_size_zero() {
 #[test]
 fn empty_str() {
 	let mut chain = MarkovChain::new(2);
-	chain.add_text(word_regex_matches(""));
+	chain.add_tokens(word_regex_matches(""));
 
 	let mut rng = rand::thread_rng();
 
@@ -27,7 +27,7 @@ fn empty_str() {
 #[test]
 fn zero_state_empty_str() {
 	let mut chain = MarkovChain::new(0);
-	chain.add_text(word_regex_matches(""));
+	chain.add_tokens(word_regex_matches(""));
 
 	let mut rng = rand::thread_rng();
 
@@ -37,7 +37,7 @@ fn zero_state_empty_str() {
 #[test]
 fn len1() {
 	let mut chain = MarkovChain::new(1);
-	chain.add_text(word_regex_matches(TEST_TEXT));
+	chain.add_tokens(word_regex_matches(TEST_TEXT));
 
 	assert_eq!(chain.len(), 63)
 }
@@ -45,7 +45,7 @@ fn len1() {
 #[test]
 fn len2() {
 	let mut chain = MarkovChain::new(2);
-	chain.add_text(word_regex_matches(TEST_TEXT));
+	chain.add_tokens(word_regex_matches(TEST_TEXT));
 
 	assert_eq!(chain.len(), 148)
 }
@@ -53,7 +53,7 @@ fn len2() {
 #[test]
 fn len3() {
 	let mut chain = MarkovChain::new(3);
-	chain.add_text(word_regex_matches(TEST_TEXT));
+	chain.add_tokens(word_regex_matches(TEST_TEXT));
 
 	assert_eq!(chain.len(), 236)
 }
@@ -61,7 +61,7 @@ fn len3() {
 #[test]
 fn short_str() {
 	let mut chain = MarkovChain::new(2);
-	chain.add_text(word_regex_matches("aaa"));
+	chain.add_tokens(word_regex_matches("aaa"));
 
 	let mut rng = rand::thread_rng();
 
@@ -72,7 +72,7 @@ fn short_str() {
 fn seed1() {
 	for _ in 0..10 {
 		let mut chain = MarkovChain::new(2);
-		chain.add_text(word_regex_matches(TEST_TEXT));
+		chain.add_tokens(word_regex_matches(TEST_TEXT));
 
 		let mut rng = rand::rngs::StdRng::seed_from_u64(1337);
 
@@ -98,7 +98,7 @@ fn seed1() {
 fn seed2() {
 	for _ in 0..10 {
 		let mut chain = MarkovChain::new(2);
-		chain.add_text(word_regex_matches(TEST_TEXT));
+		chain.add_tokens(word_regex_matches(TEST_TEXT));
 
 		let seed = thread_rng().gen();
 
@@ -116,11 +116,11 @@ fn seed3() {
 	for i in 1..=10 {
 		let mut chain1 = MarkovChain::new(2);
 		for _ in 0..i {
-			chain1.add_text(word_regex_matches(TEST_TEXT));
+			chain1.add_tokens(word_regex_matches(TEST_TEXT));
 		}
 		let mut chain2 = MarkovChain::new(2);
 		for _ in 0..i {
-			chain2.add_text(word_regex_matches(TEST_TEXT));
+			chain2.add_tokens(word_regex_matches(TEST_TEXT));
 		}
 
 		let seed = thread_rng().gen();
@@ -146,10 +146,10 @@ fn seed3() {
 fn weight() {
 	for i in 0..=10 {
 		let mut chain1 = MarkovChain::new(2);
-		chain1.add_text_weighted(word_regex_matches(TEST_TEXT), i);
+		chain1.add_tokens_weighted(word_regex_matches(TEST_TEXT), i);
 
 		let mut chain2 = MarkovChain::new(2);
-		chain2.add_text_weighted(word_regex_matches(TEST_TEXT), i);
+		chain2.add_tokens_weighted(word_regex_matches(TEST_TEXT), i);
 
 		let seed = thread_rng().gen();
 		let mut rng1 = rand::rngs::StdRng::seed_from_u64(seed);
@@ -173,7 +173,7 @@ fn weight() {
 #[test]
 fn clone() {
 	let mut chain1 = MarkovChain::new(2);
-	chain1.add_text(word_regex_matches(TEST_TEXT));
+	chain1.add_tokens(word_regex_matches(TEST_TEXT));
 	let chain2 = chain1.clone();
 
 	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
@@ -190,7 +190,7 @@ fn iter1() {
 	const LEN: usize = 10;
 
 	let mut chain = MarkovChain::new(2);
-	chain.add_text(word_regex_matches(TEST_TEXT));
+	chain.add_tokens(word_regex_matches(TEST_TEXT));
 
 	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
 	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
@@ -208,7 +208,7 @@ fn iter2() {
 	const LEN: usize = 25;
 
 	let mut chain = MarkovChain::new(2);
-	chain.add_text(word_regex_matches(TEST_TEXT));
+	chain.add_tokens(word_regex_matches(TEST_TEXT));
 
 	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
 	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
@@ -226,7 +226,7 @@ fn iter3() {
 	const LEN: usize = 100;
 
 	let mut chain = MarkovChain::new(2);
-	chain.add_text(word_regex_matches(TEST_TEXT));
+	chain.add_tokens(word_regex_matches(TEST_TEXT));
 
 	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
 	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
@@ -244,7 +244,7 @@ fn iter_start1() {
 	const LEN: usize = 10;
 
 	let mut chain = MarkovChain::new(2);
-	chain.add_text(word_regex_matches(TEST_TEXT));
+	chain.add_tokens(word_regex_matches(TEST_TEXT));
 
 	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
 	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
@@ -265,7 +265,7 @@ fn iter_start2() {
 	const LEN: usize = 25;
 
 	let mut chain = MarkovChain::new(2);
-	chain.add_text(word_regex_matches(TEST_TEXT));
+	chain.add_tokens(word_regex_matches(TEST_TEXT));
 
 	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
 	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
@@ -286,7 +286,7 @@ fn iter_start3() {
 	const LEN: usize = 100;
 
 	let mut chain = MarkovChain::new(2);
-	chain.add_text(word_regex_matches(TEST_TEXT));
+	chain.add_tokens(word_regex_matches(TEST_TEXT));
 
 	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
 	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
@@ -305,7 +305,7 @@ fn iter_start3() {
 #[test]
 fn iter_start() {
 	let mut chain = MarkovChain::new(2);
-	chain.add_text(word_regex_matches(TEST_TEXT));
+	chain.add_tokens(word_regex_matches(TEST_TEXT));
 
 	let mut rng1 = rand::rngs::StdRng::seed_from_u64(1337);
 	let mut rng2 = rand::rngs::StdRng::seed_from_u64(1337);
