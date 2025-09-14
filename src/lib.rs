@@ -34,11 +34,12 @@
 //! // Reads every file into a string
 //! let contents = files.filter_map(|f| read_to_string(f.path()).ok());
 //!
+//! let regex = Regex::new(WORD_REGEX).unwrap();
 //! // Creating the Markov Chain
 //! let markov_chain = contents.fold(
-//!     MarkovChain::with_capacity(2, 8_000_000, Regex::new(WORD_REGEX).unwrap()),
+//!     MarkovChain::with_capacity(2, 8_000_000),
 //!     |mut a, s| {
-//!         a.add_text(&s);
+//!         a.add_text(regex.find_iter(&s).map(|x| x.as_str()));
 //!         a
 //!     },
 //! );
@@ -46,19 +47,20 @@
 //! // Number of tokens
 //! println!("{}", markov_chain.len());
 //!
+//! let matches: Vec<_> = regex
+//!     .find_iter("among the       ")
+//!     .map(|x| x.as_str())
+//!     .collect();
 //! // Generation
 //! for _ in 0..10 {
-//!     println!("{}", markov_chain.generate_start("among the       ", 25, &mut rand::thread_rng()).unwrap());
+//!     println!("{}", markov_chain.generate_start(&matches, 25, &mut rand::thread_rng()).unwrap());
 //! }
-//! // Generation
-//! println!("{}", markov_chain.len());
-//!
 //! // ThreadRng
 //! for _ in 0..10 {
 //!     println!(
 //!         "ThreadRng: {}",
 //!         markov_chain
-//!             .generate_start("among the       ", 25, &mut rand::thread_rng())
+//!             .generate_start(&matches, 25, &mut rand::thread_rng())
 //!             .unwrap()
 //!     );
 //! }
@@ -69,7 +71,7 @@
 //!     println!(
 //!         "Seeded: {}",
 //!         markov_chain
-//!             .generate_start("among the       ", 25, &mut rng)
+//!             .generate_start(&matches, 25, &mut rng)
 //!             .unwrap()
 //!     );
 //! }
@@ -80,7 +82,7 @@
 //! for _ in 0..10 {
 //!     println!(
 //!         "Cloned: {}",
-//!         m.generate_start("among the       ", 25, &mut rng).unwrap()
+//!         m.generate_start(&matches, 25, &mut rng).unwrap()
 //!     );
 //! }
 //! ```
