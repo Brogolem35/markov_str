@@ -67,6 +67,10 @@ impl<const N: usize> RawMarkovChain<N> {
 		let intern_tokens = tokens.into_iter().map(|t| self.cache.get_or_intern(t));
 		let tokens: Vec<_> = intern_tokens.collect();
 
+		if tokens.is_empty() {
+			return;
+		}
+
 		for win in tokens.windows(tokens.len().min(self.state_size + 1)) {
 			let wlen = win.len();
 			let rel = win.last().unwrap();
