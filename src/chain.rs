@@ -1,7 +1,8 @@
+use std::collections::VecDeque;
+
 use hashbrown::{hash_map::RawEntryMut, HashMap};
 use lasso::{Capacity, Rodeo, Spur};
 use rand::{seq::SliceRandom, RngCore};
-use regex::Regex;
 use smallvec::SmallVec;
 
 #[cfg(feature = "serialize")]
@@ -20,8 +21,6 @@ pub struct RawMarkovChain<const N: usize> {
 	#[cfg_attr(feature = "serialize", serde(with = "any_key_map"))]
 	items: HashMap<SmallVec<[Spur; N]>, ChainItem, foldhash::fast::FixedState>,
 	state_size: usize,
-	#[cfg_attr(feature = "serialize", serde(with = "serde_regex"))]
-	regex: Regex,
 	cache: Rodeo,
 }
 
@@ -36,11 +35,10 @@ impl<const N: usize> RawMarkovChain<N> {
 	/// The hashmap and the cache of the MarkovChain is initially created with the capacity of 0.
 	/// It will not allocate until the first insertion.
 	#[inline]
-	pub fn new(state_size: usize, regex: Regex) -> RawMarkovChain<N> {
+	pub fn new(state_size: usize) -> RawMarkovChain<N> {
 		RawMarkovChain {
 			items: HashMap::with_hasher(foldhash::fast::FixedState::default()),
 			state_size,
-			regex,
 			cache: Rodeo::new(),
 		}
 	}
@@ -50,34 +48,24 @@ impl<const N: usize> RawMarkovChain<N> {
 	/// The hashmap and the cache of the MarkovChain will be able to hold at least `capacity` elements without
 	/// reallocating. If `capacity` is 0, the hashmap will not allocate.
 	#[inline]
-	pub fn with_capacity(
-		state_size: usize,
-		capacity: usize,
-		regex: Regex,
-	) -> RawMarkovChain<N> {
+	pub fn with_capacity(state_size: usize, capacity: usize) -> RawMarkovChain<N> {
 		RawMarkovChain {
 			items: HashMap::with_capacity_and_hasher(
 				capacity,
 				foldhash::fast::FixedState::default(),
 			),
 			state_size,
-			regex,
 			cache: Rodeo::with_capacity(Capacity::for_strings(capacity)),
 		}
 	}
 
 	/// Adds text as training data. The tokens will be created with the regex of the MarkovChain.
-	pub fn add_text(&mut self, text: &str) {
-		let tokens: Vec<Spur> = self
-			.regex
-			.find_iter(text)
-			.map(|t| self.cache.get_or_intern(t.as_str()))
-			.collect();
-
-		// vec.windows(0) panics for some reason.
-		if tokens.is_empty() {
-			return;
-		}
+	pub fn add_text<T>(&mut self, tokens: T)
+	where
+		T: IntoIterator<Item: AsRef<str>>,
+	{
+		let intern_tokens = tokens.into_iter().map(|t| self.cache.get_or_intern(t));
+		let tokens: Vec<_> = intern_tokens.collect();
 
 		for win in tokens.windows(tokens.len().min(self.state_size + 1)) {
 			let wlen = win.len();
@@ -108,21 +96,16 @@ impl<const N: usize> RawMarkovChain<N> {
 	/// It is mostly equivalent to calling [`MarkovChain::add_text()`] `weight` number of times, but
 	/// may not yield the same results when [`MarkovChain::generate()`] is called with same RNG,
 	/// due to internal workings.
-	pub fn add_text_weighted(&mut self, text: &str, weight: usize) {
+	pub fn add_text_weighted<T>(&mut self, tokens: T, weight: usize)
+	where
+		T: IntoIterator<Item: AsRef<str>>,
+	{
 		if weight == 0 {
 			return;
 		}
 
-		let tokens: Vec<Spur> = self
-			.regex
-			.find_iter(text)
-			.map(|t| self.cache.get_or_intern(t.as_str()))
-			.collect();
-
-		// vec.windows(0) panics for some reason.
-		if tokens.is_empty() {
-			return;
-		}
+		let intern_tokens = tokens.into_iter().map(|t| self.cache.get_or_intern(t));
+		let tokens: Vec<_> = intern_tokens.collect();
 
 		for win in tokens.windows(tokens.len().min(self.state_size + 1)) {
 			let wlen = win.len();
@@ -170,12 +153,15 @@ impl<const N: usize> RawMarkovChain<N> {
 	/// Generates text of given length, with accordance to the given starting value.
 	///
 	/// Returns `None` if there is no state.
-	pub fn generate_start(
+	pub fn generate_start<T>(
 		&self,
-		start: &str,
+		start: T,
 		length: usize,
 		rng: &mut impl RngCore,
-	) -> Option<String> {
+	) -> Option<String>
+	where
+		T: IntoIterator<Item: AsRef<str>>,
+	{
 		if self.is_empty() {
 			return None;
 		}
@@ -214,12 +200,6 @@ impl<const N: usize> RawMarkovChain<N> {
 		self.state_size
 	}
 
-	/// Returns a copy of the regex.
-	#[inline]
-	pub fn regex(&self) -> Regex {
-		self.regex.clone()
-	}
-
 	/// Does the same thing as [`MarkovChain::generate()`] but instead of returning a String, returns a lazily evaluated iterator.
 	#[inline]
 	pub fn iter<'a>(
@@ -237,23 +217,26 @@ impl<const N: usize> RawMarkovChain<N> {
 
 	/// Does the same thing as [`MarkovChain::generate_start()`] but instead of returning a String, returns a lazily evaluated iterator.
 	#[inline]
-	pub fn iter_start<'a>(
+	pub fn iter_start<'a, T>(
 		&'a self,
-		start: &str,
+		start: T,
 		count: usize,
 		rng: &'a mut dyn RngCore,
-	) -> MarkovChainIter<'a, N> {
-		let prev: Vec<Spur> = self
-			.regex
-			.find_iter(start)
-			.map(|m| m.as_str())
-			.collect::<Vec<&str>>()
-			.into_iter()
-			.rev()
-			.take(self.state_size)
-			.rev()
-			.filter_map(|t| self.cache.get(t))
-			.collect();
+	) -> MarkovChainIter<'a, N>
+	where
+		T: IntoIterator<Item: AsRef<str>>,
+	{
+		let mut buf = VecDeque::with_capacity(self.state_size + 1);
+
+		// take last state_size items
+		for s in start {
+			buf.push_back(s);
+			if buf.len() > self.state_size {
+				let _ = buf.pop_front();
+			}
+		}
+
+		let prev = buf.into_iter().filter_map(|t| self.cache.get(t)).collect();
 
 		MarkovChainIter {
 			chain: self,
