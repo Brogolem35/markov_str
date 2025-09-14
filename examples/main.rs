@@ -23,24 +23,26 @@ fn main() {
 	// Reads every file into a string
 	let contents = files.filter_map(|f| read_to_string(f.path()).ok());
 
+	let regex = Regex::new(WORD_REGEX).unwrap();
 	// Creating the Markov Chain
-	let markov_chain = contents.fold(
-		MarkovChain::with_capacity(2, 8_000_000, Regex::new(WORD_REGEX).unwrap()),
-		|mut a, s| {
-			a.add_text(&s);
-			a
-		},
-	);
+	let markov_chain = contents.fold(MarkovChain::with_capacity(2, 8_000_000), |mut a, s| {
+		a.add_text(regex.find_iter(&s).map(|x| x.as_str()));
+		a
+	});
 
 	// Generation
 	println!("{}", markov_chain.len());
 
+	let matches: Vec<_> = regex
+		.find_iter("among the       ")
+		.map(|x| x.as_str())
+		.collect();
 	// ThreadRng
 	for _ in 0..10 {
 		println!(
 			"ThreadRng: {}",
 			markov_chain
-				.generate_start("among the       ", 25, &mut rand::thread_rng())
+				.generate_start(&matches, 25, &mut rand::thread_rng())
 				.unwrap()
 		);
 	}
@@ -50,9 +52,7 @@ fn main() {
 	for _ in 0..10 {
 		println!(
 			"Seeded: {}",
-			markov_chain
-				.generate_start("among the       ", 25, &mut rng)
-				.unwrap()
+			markov_chain.generate_start(&matches, 25, &mut rng).unwrap()
 		);
 	}
 
@@ -64,7 +64,7 @@ fn main() {
 
 	// Iter Start
 	let mut rng = rand::rngs::StdRng::seed_from_u64(1337);
-	for w in markov_chain.iter_start("among the       ", 25, &mut rng) {
+	for w in markov_chain.iter_start(&matches, 25, &mut rng) {
 		println!("Iter Start: {}", w);
 	}
 
